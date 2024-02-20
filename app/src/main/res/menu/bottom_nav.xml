@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Noticias"
+        android:id="@+id/noticias"
+        android:icon="@drawable/nav_noticias_icon"/>
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Comboios"
+        android:id="@+id/comboios"
+        android:icon="@drawable/nav_comb_icon"/>
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Favortitos"
+        android:id="@+id/favoritos"
+        android:icon="@drawable/nav_fav_icon"/>
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Perfil"
+        android:id="@+id/perfil"
+        android:icon="@drawable/nav_perfil_icon"/>
+</menu>

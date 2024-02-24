@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 @Entity(tableName = "Acessibilidade")
 data class Acessibilidade(
-    @PrimaryKey val id:Int,
+    @PrimaryKey(autoGenerate = true) val id:Int,
     val informacao: String,
     val descricai: String
 )

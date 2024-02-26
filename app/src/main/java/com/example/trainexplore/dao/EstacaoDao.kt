@@ -13,11 +13,11 @@ import com.example.trainexplore.entities.Estacao
 interface EstacaoDao{
     // inserir estação
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertEstacao(Estacao: Estacao): Long
+    suspend fun insertEstacao(estacao: Estacao): Long
 
     //update a uma estacao
     @Update
-    suspend fun updateEstacao(Estacao: Estacao)
+    suspend fun updateEstacao(estacao: Estacao)
 
     //apagar uma estacao especifica
     @Query("DELETE FROM Estacao WHERE id= :id")

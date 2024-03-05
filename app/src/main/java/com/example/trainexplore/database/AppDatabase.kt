@@ -17,23 +17,23 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun Utilizador(): UtilizadorDao
     abstract fun Ponto_interesse(): Ponto_interesseDao
 
-    @Volatile
-    private var INSTANCE: AppDatabase? = null
 
+    object DatabaseBuilder {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
 
-    //Impedir que exista mais de uma instância da base de dados aberta ao mesmo tempo
-    fun getDatabase(context: Context): AppDatabase {
-        return INSTANCE ?: synchronized(this) {
-            val instance = Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "TrainExploreDB"
-            ).build()
-            INSTANCE = instance
-            instance
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "my_app_database"
+                ).fallbackToDestructiveMigration() // Handle migrations properly in production apps
+                    .build()
+                INSTANCE = instance
+                instance
+            }
         }
     }
-
-
 
 }

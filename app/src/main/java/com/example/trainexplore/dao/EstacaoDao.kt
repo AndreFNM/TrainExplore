@@ -20,7 +20,7 @@ interface EstacaoDao{
     suspend fun updateEstacao(estacao: Estacao)
 
     //apagar uma estacao especifica
-    @Query("DELETE FROM Estacao WHERE id= :id")
-    suspend fun deleteEstacao(id: Int)
+    @Query("SELECT * FROM Estacao")
+    fun selectEstacoes(): LiveData<List<Estacao>>
 
 }

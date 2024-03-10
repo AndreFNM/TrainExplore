@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.trainexplore.dao.*
+import com.example.trainexplore.dao.Acess
 import com.example.trainexplore.entities.*
 
 @Database(entities = [Estacao::class, Acess::class, Acessibilidade::class, Fav::class, Favorito::class, Noticia::class,
@@ -18,22 +19,25 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun Ponto_interesse(): Ponto_interesseDao
 
 
-    object DatabaseBuilder {
+    companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
+            val tempInstance = INSTANCE
+            if (tempInstance != null) {
+                return tempInstance
+            }
+            synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "my_app_database"
-                ).fallbackToDestructiveMigration() // Handle migrations properly in production apps
-                    .build()
+                    "TrainExploreDB"
+                ).build()
                 INSTANCE = instance
-                instance
+                return instance
             }
         }
     }
-
 }
+

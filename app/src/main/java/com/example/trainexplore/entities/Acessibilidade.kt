@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 data class Acessibilidade(
     @PrimaryKey(autoGenerate = true) val id:Int,
     val informacao: String,
-    val descricai: String
+    val descricao: String
 )

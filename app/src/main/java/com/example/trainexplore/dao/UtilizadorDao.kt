@@ -24,7 +24,7 @@ interface UtilizadorDao{
 
     //get todos os utilizadores
     @Query("SELECT * FROM Utilizador")
-    suspend fun getAllUtilizadores(): LiveData<List<Utilizador>>
+    fun getAllUtilizadores(): LiveData<List<Utilizador>>
 
     //get utilizadores por id
     @Query("SELECT * FROM utilizador WHERE id= :id")

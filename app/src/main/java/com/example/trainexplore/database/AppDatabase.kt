@@ -4,12 +4,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import com.example.trainexplore.dao.*
-import com.example.trainexplore.dao.Acess
+import com.example.trainexplore.dao.AcessDao
 import com.example.trainexplore.entities.*
 
-@Database(entities = [Estacao::class, Acess::class, Acessibilidade::class, Fav::class, Favorito::class, Noticia::class,
+@Database(entities = [Estacao::class, AcessDao::class, Acessibilidade::class, Fav::class, Favorito::class, Noticia::class,
                      Noticias::class, Ponto_interesse::class, Utilizador::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun Estacao(): EstacaoDao

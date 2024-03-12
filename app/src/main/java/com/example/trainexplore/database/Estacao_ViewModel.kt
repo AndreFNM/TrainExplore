@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.example.trainexplore.dao.EstacaoDao
 import com.example.trainexplore.entities.Estacao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,11 +12,11 @@ import kotlinx.coroutines.launch
 class Estacao_ViewModel(application: Application): AndroidViewModel(application) {
 
     private val readAllEstacoes: LiveData<List<Estacao>>
-    private val repository: AppRepository
+    private val repository: Estacao_Repository
 
     init {
         val estacaoDao = AppDatabase.getDatabase(application).Estacao()
-        repository = AppRepository(estacaoDao)
+        repository = Estacao_Repository(estacaoDao)
         readAllEstacoes = repository.readAllData
     }
 

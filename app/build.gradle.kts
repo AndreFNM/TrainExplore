@@ -62,4 +62,8 @@ dependencies {
 
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+
+    //dependencias google API's
+    implementation ("com.google.android.gms:play-services-maps:17.0.1")
+
 }

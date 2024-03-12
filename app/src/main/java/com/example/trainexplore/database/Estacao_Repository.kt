@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import com.example.trainexplore.dao.EstacaoDao
 import com.example.trainexplore.entities.Estacao
 
-class AppRepository(private val EstacaoDao: EstacaoDao) {
+class Estacao_Repository(private val EstacaoDao: EstacaoDao) {
 
     val readAllData: LiveData<List<Estacao>> = EstacaoDao.selectEstacoes()
 

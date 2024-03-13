@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.OnConflictStrategy
 import com.example.trainexplore.entities.Fav
 
+@Dao
 interface FavDao {
 
     @Insert

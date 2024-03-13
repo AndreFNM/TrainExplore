@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "be45a8a77fdc60548e76d07ec82a2b81",
+    "identityHash": "6cf4c24f428828b1f3a501e116995c7f",
     "entities": [
       {
         "tableName": "Estacao",
@@ -67,17 +67,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "AcessDao",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
-        "fields": [],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": []
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "Acessibilidade",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `informacao` TEXT NOT NULL, `descricao` TEXT NOT NULL)",
         "fields": [
@@ -111,27 +100,41 @@
       },
       {
         "tableName": "Fav",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_favorito` INTEGER NOT NULL, `id_utilizador` INTEGER NOT NULL, FOREIGN KEY(`id_favorito`) REFERENCES `Favorito`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_utilizador` INTEGER NOT NULL, `id_favorito` INTEGER NOT NULL, PRIMARY KEY(`id_utilizador`, `id_favorito`), FOREIGN KEY(`id_utilizador`) REFERENCES `Utilizador`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_favorito`) REFERENCES `Favorito`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
-            "fieldPath": "id_favorito",
-            "columnName": "id_favorito",
+            "fieldPath": "id_utilizador",
+            "columnName": "id_utilizador",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "id_utilizador",
-            "columnName": "id_utilizador",
+            "fieldPath": "id_favorito",
+            "columnName": "id_favorito",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": []
+          "columnNames": [
+            "id_utilizador",
+            "id_favorito"
+          ]
         },
         "indices": [],
         "foreignKeys": [
+          {
+            "table": "Utilizador",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_utilizador"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
           {
             "table": "Favorito",
             "onDelete": "NO ACTION",
@@ -228,24 +231,27 @@
       },
       {
         "tableName": "Noticias",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_noticias` INTEGER NOT NULL, `id_estacao` INTEGER NOT NULL, FOREIGN KEY(`id_estacao`) REFERENCES `Estacao`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_noticias`) REFERENCES `Noticia`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_estacao` INTEGER NOT NULL, `id_noticias` INTEGER NOT NULL, PRIMARY KEY(`id_estacao`, `id_noticias`), FOREIGN KEY(`id_estacao`) REFERENCES `Estacao`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_noticias`) REFERENCES `Noticia`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
-            "fieldPath": "id_noticias",
-            "columnName": "id_noticias",
+            "fieldPath": "id_estacao",
+            "columnName": "id_estacao",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "id_estacao",
-            "columnName": "id_estacao",
+            "fieldPath": "id_noticias",
+            "columnName": "id_noticias",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": []
+          "columnNames": [
+            "id_estacao",
+            "id_noticias"
+          ]
         },
         "indices": [],
         "foreignKeys": [
@@ -359,7 +365,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'be45a8a77fdc60548e76d07ec82a2b81')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6cf4c24f428828b1f3a501e116995c7f')"
     ]
   }
 }

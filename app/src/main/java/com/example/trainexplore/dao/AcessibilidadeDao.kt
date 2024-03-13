@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.OnConflictStrategy
 import com.example.trainexplore.entities.Acessibilidade
 
+@Dao
 interface AcessibilidadeDao {
 
 

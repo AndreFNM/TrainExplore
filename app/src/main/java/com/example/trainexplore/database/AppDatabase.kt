@@ -11,8 +11,6 @@ import com.example.trainexplore.entities.*
                      Noticias::class, Ponto_interesse::class, Utilizador::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun Estacao(): EstacaoDao
-    // adicionar outras estações aqui
-
     abstract fun Utilizador(): UtilizadorDao
     abstract fun Ponto_interesse(): Ponto_interesseDao
 

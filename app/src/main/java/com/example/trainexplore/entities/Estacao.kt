@@ -7,14 +7,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Estacao",
     foreignKeys = [
-        ForeignKey(
-            entity = Favorito::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("favorito_id"),
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-    )
+        ForeignKey(entity = ItemFavorito::class, parentColumns = arrayOf("itemId"), childColumns = arrayOf("id"),
+            onDelete = ForeignKey.CASCADE)])
 data class Estacao(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val nome: String,

@@ -7,6 +7,6 @@ data class Utilizador(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val nome: String,
     val email: String,
-    val password: String,
+    val pass: String,
     val imageUrl: String?, //Url para a imagem na cloud
 )

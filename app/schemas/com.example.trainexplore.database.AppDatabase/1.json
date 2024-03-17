@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6cf4c24f428828b1f3a501e116995c7f",
+    "identityHash": "74490822b686ef06dbc8186c8cd31d8b",
     "entities": [
       {
         "tableName": "Estacao",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `ano_construcao` TEXT NOT NULL, `foto` TEXT, `descricao` TEXT NOT NULL, `estado_atual` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `ano_construcao` TEXT NOT NULL, `foto` TEXT, `descricao` TEXT NOT NULL, `estado_atual` TEXT NOT NULL, `favorito_id` INTEGER NOT NULL, FOREIGN KEY(`favorito_id`) REFERENCES `Favorito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -55,6 +55,12 @@
             "columnName": "estado_atual",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "favorito_id",
+            "columnName": "favorito_id",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -64,7 +70,19 @@
           ]
         },
         "indices": [],
-        "foreignKeys": []
+        "foreignKeys": [
+          {
+            "table": "Favorito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "favorito_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "Acessibilidade",
@@ -281,7 +299,7 @@
       },
       {
         "tableName": "Ponto_interesse",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `favorito_id` INTEGER NOT NULL, FOREIGN KEY(`favorito_id`) REFERENCES `Favorito`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -306,6 +324,12 @@
             "columnName": "longitude",
             "affinity": "REAL",
             "notNull": true
+          },
+          {
+            "fieldPath": "favorito_id",
+            "columnName": "favorito_id",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -315,7 +339,19 @@
           ]
         },
         "indices": [],
-        "foreignKeys": []
+        "foreignKeys": [
+          {
+            "table": "Favorito",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "favorito_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "Utilizador",
@@ -365,7 +401,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6cf4c24f428828b1f3a501e116995c7f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '74490822b686ef06dbc8186c8cd31d8b')"
     ]
   }
 }

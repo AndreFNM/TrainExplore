@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import com.example.trainexplore.dao.*
 import com.example.trainexplore.entities.*
 
-@Database(entities = [Estacao::class, Acessibilidade::class, Fav::class, Favorito::class, Noticia::class,
-                     Noticias::class, Ponto_interesse::class, Utilizador::class, ItemFavorito::class], version = 1)
+@Database(entities = [Estacao::class, Acessibilidade::class, Favorito::class, Noticia::class,
+                     Noticias::class, Ponto_interesse::class, Utilizador::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun Estacao(): EstacaoDao
     abstract fun Utilizador(): UtilizadorDao

@@ -18,8 +18,6 @@
         android:id="@+id/imagem_login"
         android:layout_width="160dp"
         android:layout_height="160dp"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="Imagem Login"
         android:layout_marginTop="48dp"
         android:src="@drawable/loginimg"
         />
@@ -28,10 +26,8 @@
         android:id="@+id/loginLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/imagem_login"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
-        android:text="Login"
+        android:text="@string/login"
         android:textStyle="bold"
         android:textSize="24sp" />
 
@@ -40,19 +36,17 @@
         android:id="@+id/username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/loginLabel"
         android:layout_marginTop="32dp"
-        android:hint="Nome de Utilizador"
+        android:hint="@string/nome_de_utilizador"
         android:background="@drawable/rounded_corner"
         android:padding="18dp"/>
 
     <EditText
         android:id="@+id/password"
-        android:hint="Password"
+        android:hint="@string/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
-        android:layout_below="@id/username"
         android:layout_marginTop="16dp"
         android:background="@drawable/rounded_corner"
         android:padding="18dp"/>
@@ -61,10 +55,9 @@
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/password"
         android:layout_marginTop="32dp"
         android:padding="18dp"
-        android:text="Login"
+        android:text="@string/login"
         android:backgroundTint="#0E6589"
         android:textColor="#FFFFFF" />
 
@@ -73,9 +66,8 @@
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registar"
+        android:text="@string/registar"
         android:backgroundTint="#0E6589"
-        android:layout_below="@id/loginButton"
         android:padding="18dp"
         android:layout_marginTop="16dp"
         android:textColor="#FFFFFF" />

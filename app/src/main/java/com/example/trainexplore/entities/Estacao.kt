@@ -14,5 +14,5 @@ data class Estacao(
     val ano_construcao: String, // se quiser usar Date type preciso de fazer uma classe para converter porque o room não tem Date
     val foto: String?,
     val descricao: String,
-    val estado_atual: String,
+    val estado_atual: String
 )

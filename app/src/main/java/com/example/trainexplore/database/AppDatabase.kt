@@ -10,9 +10,9 @@ import com.example.trainexplore.entities.*
 @Database(entities = [Estacao::class, Acessibilidade::class, Favorito::class, Noticia::class,
                      Noticias::class, Ponto_interesse::class, Utilizador::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun Estacao(): EstacaoDao
-    abstract fun Utilizador(): UtilizadorDao
-    abstract fun Ponto_interesse(): Ponto_interesseDao
+    abstract fun estacaoDao(): EstacaoDao
+    abstract fun utilizadorDao(): UtilizadorDao
+    abstract fun pontoInteressedao(): Ponto_interesseDao
 
 
     companion object {
@@ -20,18 +20,16 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            val tempInstance = INSTANCE
-            if (tempInstance != null) {
-                return tempInstance
-            }
-            synchronized(this) {
+            return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "TrainExploreDB"
-                ).build()
+                )
+                    .createFromAsset("TrainExplore.db") // Correctly load the pre-populated database from assets
+                    .build()
                 INSTANCE = instance
-                return instance
+                instance
             }
         }
     }

@@ -23,5 +23,5 @@ object DatabaseModule {
 
     @Singleton
     @Provides
-    fun provideDao(database: AppDatabase) = database.Estacao()
+    fun provideDao(database: AppDatabase) = database.estacaoDao()
 }

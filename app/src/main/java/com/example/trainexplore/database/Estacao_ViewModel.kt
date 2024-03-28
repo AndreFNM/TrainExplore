@@ -1,28 +1,17 @@
 package com.example.trainexplore.database
 
-import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.trainexplore.entities.Estacao
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.lifecycle.asLiveData
 
 
-class Estacao_ViewModel(application: Application): AndroidViewModel(application) {
+class Estacao_ViewModel(private val repository: Estacao_Repository): ViewModel() {
 
-    private val readAllEstacoes: LiveData<List<Estacao>>
-    private val repository: Estacao_Repository
-
-    init {
-        val estacaoDao = AppDatabase.getDatabase(application).Estacao()
-        repository = Estacao_Repository(estacaoDao)
-        readAllEstacoes = repository.readAllData
-    }
-
-    fun addEstacao(estacao: Estacao){
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.addEstacao(estacao)
-        }
-    }
+    val readAllEstacoes: LiveData<List<Estacao>> = repository.readAllEstacoes.asLiveData()
 }
+
+
+

@@ -8,12 +8,13 @@ import androidx.room.Update
 import androidx.lifecycle.LiveData
 import androidx.room.OnConflictStrategy
 import com.example.trainexplore.entities.Estacao
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EstacaoDao{
-    // inserir estação
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertEstacao(estacao: Estacao): Long
+
+    @Query("SELECT * FROM Estacao")
+    fun getAllEstacoes(): Flow<List<Estacao>>
 
     //update a uma estacao
     @Update

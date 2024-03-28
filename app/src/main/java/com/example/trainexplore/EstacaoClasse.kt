@@ -1,38 +1,29 @@
 package com.example.trainexplore
 
 import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import android.view.View
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import com.example.trainexplore.database.AppDatabase
-import com.example.trainexplore.database.EstacaoAdapter
-import com.example.trainexplore.database.Estacao_Repository
-import com.example.trainexplore.database.Estacao_ViewModel
-import com.example.trainexplore.database.ViewModelFactory
-import com.example.trainexplore.entities.Estacao
 
-class EstacaoClasse : AppCompatActivity() {
-    private lateinit var viewModel: Estacao_ViewModel
-    private lateinit var estacaoAdapter: EstacaoAdapter
+class EstacaoClasse : Fragment(R.layout.fragment_comboios) { // Ensure you have a layout resource here
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        val textViewEstacaoNome: TextView = view.findViewById(R.id.textViewEstacaoNome)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_comboios)
+        // Get the instance of the database and DAO
+        val estacaoDao = AppDatabase.getDatabase(requireContext()).estacaoDao()
 
-        val repository = Estacao_Repository(AppDatabase.getDatabase(application).estacaoDao())
-        viewModel = ViewModelProvider(this, ViewModelFactory(repository)).get(Estacao_ViewModel::class.java)
-
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        viewModel.readAllEstacoes.observe(this) { estacoes ->
-            //dar aqui os updates com a lista de estacoes
-
-        }
+        // Observe the LiveData
+        estacaoDao.getAllEstacoes().observe(viewLifecycleOwner, Observer { estacoes ->
+            if (estacoes.isNotEmpty()) {
+                val firstEstacao = estacoes.first()
+                textViewEstacaoNome.text = firstEstacao.nome
+            } else {
+                textViewEstacaoNome.text = "No data available"
+            }
+        })
     }
-
 }

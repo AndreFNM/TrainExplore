@@ -8,7 +8,7 @@ import com.example.trainexplore.dao.*
 import com.example.trainexplore.entities.*
 
 @Database(entities = [Estacao::class, Acessibilidade::class, Favorito::class, Noticia::class,
-                     Noticias::class, Ponto_interesse::class, Utilizador::class], version = 1)
+                     Noticias::class, Ponto_interesse::class, Utilizador::class, Acess::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun estacaoDao(): EstacaoDao
     abstract fun utilizadorDao(): UtilizadorDao
@@ -19,6 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -26,7 +27,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "TrainExploreDB"
                 )
-                    .createFromAsset("TrainExplore.db") // Correctly load the pre-populated database from assets
+                    .createFromAsset("TrainExplore.db")
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
@@ -34,4 +36,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

@@ -5,6 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.lifecycle.Observer
+import com.example.trainexplore.database.AppDatabase
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,6 +39,26 @@ class Comboios : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_comboios, container, false)
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val textViewEstacaoNome: TextView = view.findViewById(R.id.textViewEstacaoNome)
+
+        // Get the instance of the database and DAO
+        val estacaoDao = AppDatabase.getDatabase(requireContext()).estacaoDao()
+
+        // Observe the LiveData
+        estacaoDao.getAllEstacoes().observe(viewLifecycleOwner, Observer { estacoes ->
+            if (estacoes.isNotEmpty()) {
+                val firstEstacao = estacoes.first()
+                textViewEstacaoNome.text = firstEstacao.nome
+            } else {
+                textViewEstacaoNome.text = "No data available"
+            }
+        })
+    }
+
 
     companion object {
         /**

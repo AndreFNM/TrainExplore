@@ -8,7 +8,7 @@ import com.example.trainexplore.dao.*
 import com.example.trainexplore.entities.*
 
 @Database(entities = [Estacao::class, Acessibilidade::class, Favorito::class, Noticia::class,
-                     Noticias::class, Ponto_interesse::class, Utilizador::class, Acess::class], version = 3)
+                     Noticias::class, Ponto_interesse::class, Utilizador::class, Acess::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun estacaoDao(): EstacaoDao
     abstract fun utilizadorDao(): UtilizadorDao
@@ -34,5 +34,6 @@ abstract class AppDatabase : RoomDatabase() {
                 instance
             }
         }
+
     }
 }

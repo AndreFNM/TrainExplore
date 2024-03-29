@@ -14,6 +14,9 @@ interface EstacaoDao{
     @Query("SELECT * FROM Estacao")
     fun getAllEstacoes(): LiveData<List<Estacao>>
 
+
+    @Query("SELECT * FROM Estacao LIMIT 1")
+    fun getFirstEstacao(): LiveData<Estacao>
     //update a uma estacao
     @Update
     suspend fun updateEstacao(estacao: Estacao)

@@ -13,8 +13,8 @@ import com.example.trainexplore.entities.Favorito
 
 @Dao
 interface FavoritoDao {
-    @Transaction
+
     @Query("SELECT * FROM Favorito")
-    fun getFavoritos():List<Favorito>
+    fun getAllFavoritos():LiveData<List<Favorito>>
 
 }

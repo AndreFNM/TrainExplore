@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.trainexplore.database.AppDatabase
+import com.example.trainexplore.database.EstacaoDB.EstacaoAdapter
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -20,7 +22,6 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class Comboios : Fragment() {
-    // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
 
@@ -43,18 +44,30 @@ class Comboios : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val textViewEstacaoNome: TextView = view.findViewById(R.id.textViewEstacaoNome)
-
-        // Get the instance of the database and DAO
+        val recyclerView: RecyclerView = view.findViewById(R.id.estacoesRecyclerView)
         val estacaoDao = AppDatabase.getDatabase(requireContext()).estacaoDao()
+        val searchView: androidx.appcompat.widget.SearchView = view.findViewById(R.id.searchEstacao)
+
+        val adapter = EstacaoAdapter(listOf())
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
 
         // Observe the LiveData
         estacaoDao.getAllEstacoes().observe(viewLifecycleOwner, Observer { estacoes ->
             if (estacoes.isNotEmpty()) {
-                val firstEstacao = estacoes.first()
-                textViewEstacaoNome.text = firstEstacao.nome
-            } else {
-                textViewEstacaoNome.text = "No data available"
+                adapter.setFullEstacoes(estacoes) // atualizar a lista completa
+                adapter.updateList(estacoes) //Inicializar os items no display
+            }
+        })
+
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter(newText.orEmpty())
+                return true
             }
         })
     }

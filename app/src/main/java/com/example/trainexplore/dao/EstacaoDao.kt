@@ -2,9 +2,6 @@ package com.example.trainexplore.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Insert
-import androidx.room.Delete
-import androidx.room.Update
 import androidx.lifecycle.LiveData
 import com.example.trainexplore.entities.Estacao
 
@@ -17,9 +14,7 @@ interface EstacaoDao{
 
     @Query("SELECT * FROM Estacao LIMIT 1")
     fun getFirstEstacao(): LiveData<Estacao>
-    //update a uma estacao
-    @Update
-    suspend fun updateEstacao(estacao: Estacao)
+
 
 
 }

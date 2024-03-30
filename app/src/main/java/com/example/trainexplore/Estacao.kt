@@ -36,5 +36,12 @@ class Estacao : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<Button>(R.id.buttonMostrarAcessibilidade).setOnClickListener {
+            val intent = Intent(this, AcessibilidadeActivity::class.java).apply {
+                putExtra("estacao_id", estacaoId)
+            }
+            startActivity(intent)
+        }
+
     }
 }

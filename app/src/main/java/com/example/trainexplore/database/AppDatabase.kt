@@ -13,6 +13,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun estacaoDao(): EstacaoDao
     abstract fun utilizadorDao(): UtilizadorDao
     abstract fun pontoInteressedao(): Ponto_interesseDao
+    abstract fun acessibilidadeDao(): AcessibilidadeDao
 
 
     companion object {

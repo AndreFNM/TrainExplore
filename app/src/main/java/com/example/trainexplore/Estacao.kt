@@ -1,6 +1,8 @@
 package com.example.trainexplore
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -27,5 +29,12 @@ class Estacao : AppCompatActivity() {
         } else {
             //dar aqui handle aos erros, por exemplo ID not found ou invalido
         }
+        findViewById<Button>(R.id.buttonMostrarHistorico).setOnClickListener {
+            val intent = Intent(this, Estacao_historico::class.java).apply {
+                putExtra("estacao_id", estacaoId)
+            }
+            startActivity(intent)
+        }
+
     }
 }

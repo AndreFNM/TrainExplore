@@ -12,9 +12,13 @@
     <string name="obter_direcoes">Obter Direções</string>
     <string name="ver_clima">Ver Clima</string>
     <string name="pontos_de_interesse">Pontos de Interesse</string>
-    <string name="ver_historico">Histórico</string>
+    <string name="ver_historia">História</string>
     <string name="informacao_acessibilidade">Informações de acessibilidade</string>
     <string name="historia">História</string>
+    <string name="descicao">Descrição da estação</string>
+    <string name="nome_estacao">Nome da estação</string>
+    <string name="data_estacao">Data de Fundação da estação</string>
+    <string name="estado_estacao">Estado atual da estação</string>
 
 
 </resources>

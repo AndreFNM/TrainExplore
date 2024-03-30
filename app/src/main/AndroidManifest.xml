@@ -25,6 +25,9 @@
         <activity
             android:name=".Estacao">
         </activity>
+        <activity
+            android:name=".Estacao_historico">
+        </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />

@@ -8,13 +8,13 @@
     android:background="#ADD8E6">
 
     <ImageView
-        android:id="@+id/imageViewEstacao"
+        android:id="@+id/imagemViewEstacao"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/ic_launcher_background" />
 
     <TextView
-        android:id="@+id/textViewEstacaoInfo"
+        android:id="@+id/nomeViewEstacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

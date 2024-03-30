@@ -1,4 +1,9 @@
 package com.example.trainexplore
 
-class Estacao_historico {
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+
+class Estacao_historico : AppCompatActivity() {
+
+
 }

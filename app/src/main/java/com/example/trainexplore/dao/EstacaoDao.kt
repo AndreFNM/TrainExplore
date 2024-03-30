@@ -15,6 +15,8 @@ interface EstacaoDao{
     @Query("SELECT * FROM Estacao LIMIT 1")
     fun getFirstEstacao(): LiveData<Estacao>
 
+    @Query("SELECT * FROM Estacao WHERE id = :id")
+    fun getEstacaoById(id: Int): LiveData<Estacao>
 
 
 }

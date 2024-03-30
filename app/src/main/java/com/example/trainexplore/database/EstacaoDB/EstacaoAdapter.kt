@@ -12,13 +12,13 @@ import com.bumptech.glide.Glide
 import com.example.trainexplore.R
 import com.example.trainexplore.entities.Estacao
 
-class EstacaoAdapter(private val estacoes:List<Estacao>) : RecyclerView.Adapter<EstacaoAdapter.EstacaoViewHolder>() {
+class EstacaoAdapter(private val estacoes:List<Estacao>, private val clickListener: (Estacao) -> Unit) : RecyclerView.Adapter<EstacaoAdapter.EstacaoViewHolder>() {
     private val estacoesList: MutableList<Estacao> = estacoes.toMutableList()
     private var estacoesFull: List<Estacao> = estacoes.toList()
 
     class EstacaoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageViewEstacao: ImageView = view.findViewById(R.id.imageViewEstacao)
-        val textViewEstacaoInfo: TextView = view.findViewById(R.id.textViewEstacaoInfo)
+        val imagemViewEstacao: ImageView = view.findViewById(R.id.imagemViewEstacao)
+        val nomeViewEstacao: TextView = view.findViewById(R.id.nomeViewEstacao)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EstacaoViewHolder {
@@ -50,13 +50,15 @@ class EstacaoAdapter(private val estacoes:List<Estacao>) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: EstacaoViewHolder, position: Int) {
         val estacao = estacoesList[position]
+        //Para poder criar uma "seccao" para a estacao quando o utilizador clica na mesma
+        holder.itemView.setOnClickListener { clickListener(estacao) }
         //set imagem e texto aqui
-        holder.textViewEstacaoInfo.text = estacao.nome
+        holder.nomeViewEstacao.text = estacao.nome
 
         //utilizar Glide para dar load á imagem a partir de um url
         Glide.with(holder.itemView.context)
             .load(estacao.foto)
-            .into(holder.imageViewEstacao)
+            .into(holder.imagemViewEstacao)
     }
 
     override fun getItemCount() = estacoesList.size

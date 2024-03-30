@@ -14,18 +14,19 @@
     app:layout_constraintTop_toTopOf="parent">
 
     <TextView
+        android:id="@+id/nomeViewEstacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Estacao da base de dados"
+        android:text="nome da estacao"
         android:textSize="24sp"
         android:textStyle="bold" />
 
     <ImageView
-        android:id="@+id/imagem_estacao"
+        android:id="@+id/imagemViewEstacao"
         android:layout_width="360dp"
         android:layout_height="160dp"
         android:layout_marginTop="50sp"
-        android:src="@drawable/loginimg"
+        android:src="@drawable/ic_launcher_background"
         />
 </LinearLayout>
 

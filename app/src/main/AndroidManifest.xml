@@ -28,6 +28,9 @@
         <activity
             android:name=".Estacao_historico">
         </activity>
+        <activity
+            android:name=".AcessibilidadeActivity">
+        </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />

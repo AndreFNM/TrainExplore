@@ -5,6 +5,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "Acessibilidade")
 data class Acessibilidade(
     @PrimaryKey(autoGenerate = true) val id:Int,
-    val informacao: String,
-    val descricao: String
+    val informacao: String
 )

@@ -1,0 +1,415 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "79f4f44462f8357b22105f1dab889de4",
+    "entities": [
+      {
+        "tableName": "Estacao",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `ano_construcao` TEXT NOT NULL, `foto` TEXT, `descricao` TEXT NOT NULL, `estado_atual` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ano_construcao",
+            "columnName": "ano_construcao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "foto",
+            "columnName": "foto",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "descricao",
+            "columnName": "descricao",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado_atual",
+            "columnName": "estado_atual",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Acessibilidade",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `informacao` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "informacao",
+            "columnName": "informacao",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Favorito",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `estacaoId` INTEGER, `pontoInteresseId` INTEGER, `utilizadorId` INTEGER NOT NULL, FOREIGN KEY(`utilizadorId`) REFERENCES `Utilizador`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`estacaoId`) REFERENCES `Estacao`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`pontoInteresseId`) REFERENCES `Ponto_interesse`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estacaoId",
+            "columnName": "estacaoId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pontoInteresseId",
+            "columnName": "pontoInteresseId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "utilizadorId",
+            "columnName": "utilizadorId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_Favorito_utilizadorId_estacaoId",
+            "unique": true,
+            "columnNames": [
+              "utilizadorId",
+              "estacaoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Favorito_utilizadorId_estacaoId` ON `${TABLE_NAME}` (`utilizadorId`, `estacaoId`)"
+          },
+          {
+            "name": "index_Favorito_utilizadorId_pontoInteresseId",
+            "unique": true,
+            "columnNames": [
+              "utilizadorId",
+              "pontoInteresseId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Favorito_utilizadorId_pontoInteresseId` ON `${TABLE_NAME}` (`utilizadorId`, `pontoInteresseId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "Utilizador",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "utilizadorId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "Estacao",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "estacaoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "Ponto_interesse",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "pontoInteresseId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "Noticia",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `Titulo` TEXT NOT NULL, `Conteudo` TEXT NOT NULL, `data` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Titulo",
+            "columnName": "Titulo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "Conteudo",
+            "columnName": "Conteudo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Noticias",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_estacao` INTEGER NOT NULL, `id_noticias` INTEGER NOT NULL, PRIMARY KEY(`id_estacao`, `id_noticias`), FOREIGN KEY(`id_estacao`) REFERENCES `Estacao`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_noticias`) REFERENCES `Noticia`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id_estacao",
+            "columnName": "id_estacao",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id_noticias",
+            "columnName": "id_noticias",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_estacao",
+            "id_noticias"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "Estacao",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_estacao"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "Noticia",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_noticias"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "Ponto_interesse",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Utilizador",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `email` TEXT NOT NULL, `pass` TEXT NOT NULL, `imageUrl` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nome",
+            "columnName": "nome",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pass",
+            "columnName": "pass",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Acess",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_acessibilidade` INTEGER NOT NULL, `id_estacao` INTEGER NOT NULL, PRIMARY KEY(`id_acessibilidade`, `id_estacao`), FOREIGN KEY(`id_acessibilidade`) REFERENCES `Acessibilidade`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`id_estacao`) REFERENCES `Estacao`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id_acessibilidade",
+            "columnName": "id_acessibilidade",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id_estacao",
+            "columnName": "id_estacao",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id_acessibilidade",
+            "id_estacao"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "Acessibilidade",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_acessibilidade"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "Estacao",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "id_estacao"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '79f4f44462f8357b22105f1dab889de4')"
+    ]
+  }
+}

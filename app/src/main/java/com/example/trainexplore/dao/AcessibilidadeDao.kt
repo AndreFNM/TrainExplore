@@ -18,21 +18,24 @@ import com.example.trainexplore.entities.Estacao
 
 @Dao
 interface AcessibilidadeDao {
-        @Transaction
-        @Query("SELECT * FROM Acessibilidade WHERE id= :estacaoId")
-        fun getAcessibilidadeByEstacao(estacaoId: Int): LiveData<List<EstacaoComAcessibilidade>>
+
+    @Query("""SELECT Acessibilidade.informacao FROM Acessibilidade
+                JOIN Acess ON Acessibilidade.id = Acess.id_acessibilidade
+                WHERE Acess.id_estacao = :estacaoId """)
+    fun getAcessibilidadeByEstacao(estacaoId: Int): LiveData<List<String>>
 }
 
 data class EstacaoComAcessibilidade(
-        @Embedded val estacao: Estacao,
-        @Relation(
-                parentColumn = "id",
-                entityColumn = "id",
-                associateBy = Junction(
-                        value = Acess::class,
-                        parentColumn = "id_estacao",
-                        entityColumn = "id_acessibilidade"
-                )
+    @Embedded val estacao: Estacao,
+    @Relation(
+        entity = Acessibilidade::class,
+        parentColumn = "id",
+        entityColumn = "id_acessibilidade",
+        associateBy = Junction(
+            value = Acess::class,
+            parentColumn = "id_estacao",
+            entityColumn = "id_acessibilidade"
         )
-        val acessibilidadeDao: List<Acessibilidade>
+    )
+    val acessibilidades: List<Acessibilidade>
 )

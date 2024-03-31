@@ -1,17 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:layout_marginBottom="8dp">
+    android:gravity="center_horizontal"
+    android:background="#FAFAFA">
 
-
-    <TextView
-        android:id="@+id/testeAcessibilidade"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Teste acessibilidade"
-        android:textSize="18sp" />
+        android:layout_marginTop="20dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/acessibilidadeInfo1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:drawablePadding="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:drawableStartCompat="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/acessibilidadeInfo2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:drawablePadding="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:drawableStartCompat="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/acessibilidadeInfo3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:drawablePadding="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:drawableStartCompat="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/acessibilidadeInfo4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:drawablePadding="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                app:drawableStartCompat="@drawable/ic_launcher_background" />
+
+            <TextView
+                android:id="@+id/errorMessageTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#FF0000"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/mensagemErroTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>
+
+
+

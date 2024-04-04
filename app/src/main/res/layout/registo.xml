@@ -36,6 +36,7 @@
             android:textStyle="bold"
             />
         <EditText
+            android:id="@+id/inserir_nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
@@ -45,8 +46,7 @@
             android:textSize="20sp"
             android:background="@drawable/rounded_corner"
             android:padding="18dp"
-            android:inputType="text"
-            android:id="@+id/username_inout"/>
+            android:inputType="text" />
 
         <EditText
             android:layout_width="match_parent"
@@ -59,7 +59,7 @@
             android:background="@drawable/rounded_corner"
             android:padding="18dp"
             android:inputType="textEmailAddress"
-            android:id="@+id/email_inout"/>
+            android:id="@+id/inserir_email"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -72,7 +72,7 @@
             android:background="@drawable/rounded_corner"
             android:padding="18dp"
             android:inputType="textPassword"
-            android:id="@+id/password_inout"/>
+            android:id="@+id/inserir_pass"/>
 
         <Button
             android:layout_width="match_parent"

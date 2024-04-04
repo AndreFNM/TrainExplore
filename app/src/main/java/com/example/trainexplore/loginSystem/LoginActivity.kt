@@ -1,33 +1,54 @@
+
 package com.example.trainexplore.loginSystem
 
+
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.trainexplore.Comboios
+import com.example.trainexplore.MainActivity
+import com.example.trainexplore.R
 import com.example.trainexplore.database.AppDatabase
-import com.example.trainexplore.entities.Utilizador
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.mindrot.jbcrypt.BCrypt
+import kotlinx.coroutines.launch
+
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var database: AppDatabase
+    private lateinit var repository : UtilizadorRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.login)
 
-        database = AppDatabase.getDatabase(applicationContext)
+        val db = AppDatabase.getDatabase(this)
+        repository = UtilizadorRepository(db)
+
+        val emailInput = findViewById<EditText>(R.id.email_login)
+        val passInput = findViewById<EditText>(R.id.pass_login)
+        val loginButton = findViewById<Button>(R.id.loginButton)
+
+        loginButton.setOnClickListener {
+            val email = emailInput.text.toString().trim()
+            val pass = passInput.text.toString().trim()
+
+            //Realizar o login
+            loginUtilizador(email, pass)
+        }
     }
-
-    suspend fun registar(nome: String, email: String, password: String, imageUrl: String?) {
-        withContext(Dispatchers.IO) {
-            val passwordHash = BCrypt.hashpw(password, BCrypt.gensalt())
-            val novoUtilizador = Utilizador(0, nome, email, passwordHash, imageUrl)
-            database.utilizadorDao().registerUser(novoUtilizador)
+    private fun loginUtilizador(email: String, pass: String) {
+        lifecycleScope.launch {
+            if (repository.validarUtilizador(email, pass)) {
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this@LoginActivity, "Email ou Password inválidos", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
-    suspend fun validacaoLogin(email: String, password: String): Boolean = withContext(Dispatchers.IO) {
-        val utilizador = database.utilizadorDao().getUserByEmail(email)
-        utilizador?.let { BCrypt.checkpw(password, it.pass) } ?: false
-    }
 }

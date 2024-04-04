@@ -10,8 +10,8 @@ import com.example.trainexplore.entities.Utilizador
 interface UtilizadorDao{
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun registerUser(user: Utilizador)
+    fun registerUser(utilizador: Utilizador): Long
 
-    @Query("SELECT * FROM Utilizador WHERE email = :email")
+    @Query("SELECT * FROM Utilizador WHERE email = :email LIMIT 1")
     fun getUserByEmail(email: String): Utilizador?
 }

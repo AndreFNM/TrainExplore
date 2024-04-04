@@ -18,18 +18,28 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".loginSystem.RegistarActivity">
+        </activity>
+
         <activity
             android:name=".Estacao">
         </activity>
+
         <activity
             android:name=".Estacao_historico">
         </activity>
+
         <activity
             android:name=".AcessibilidadeActivity">
+        </activity>
+
+        <activity
+            android:name=".Comboios">
         </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"

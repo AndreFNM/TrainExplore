@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:padding="16dp"
     android:layout_marginBottom="8dp"
-    android:background="#ADD8E6">
+    android:background="@drawable/rounded_blue">
 
     <ImageView
         android:id="@+id/imagemViewEstacao"

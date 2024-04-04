@@ -92,4 +92,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.11.0")
     implementation ("androidx.cardview:cardview:1.0.0")
 
+    //para usar a biblioteca jBCrypt para BCrypt
+    implementation ("org.mindrot:jbcrypt:0.4")
+
 }

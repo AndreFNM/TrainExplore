@@ -74,6 +74,7 @@
             android:backgroundTint="#0E6589"
             />
         <Button
+            android:id="@+id/addEstacaoFavButton"
             android:layout_width="160dp"
             android:layout_height="70dp"
             android:layout_marginTop="15dp"

@@ -24,6 +24,8 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
+        val paraPaginaRegisto = findViewById<Button>(R.id.registerButton)
+
         val db = AppDatabase.getDatabase(this)
         repository = UtilizadorRepository(db)
 
@@ -37,6 +39,11 @@ class LoginActivity : AppCompatActivity() {
 
             //Realizar o login
             loginUtilizador(email, pass)
+        }
+
+        paraPaginaRegisto.setOnClickListener {
+            val intent = Intent(this, RegistarActivity::class.java)
+            startActivity(intent)
         }
     }
     private fun loginUtilizador(email: String, pass: String) {

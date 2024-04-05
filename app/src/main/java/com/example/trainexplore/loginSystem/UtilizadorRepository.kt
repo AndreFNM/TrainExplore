@@ -15,12 +15,10 @@ class UtilizadorRepository (private val db: AppDatabase) {
         }
     }
 
-    suspend fun validarUtilizador(email: String, pass: String): Boolean {
+    suspend fun validarUtilizador(email: String, pass: String): Boolean = withContext(Dispatchers.IO) {
         val utilizador = db.utilizadorDao().getUserByEmail(email)
-        return if (utilizador != null) {
-            BCrypt.checkpw(pass, utilizador.pass)
-        } else {
-            false
-        }
+        utilizador?.let {
+            BCrypt.checkpw(pass, it.pass)
+        }?: false
     }
 }

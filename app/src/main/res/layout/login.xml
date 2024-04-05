@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:hint="@string/nome_de_utilizador"
+        android:hint="@string/email"
         android:background="@drawable/rounded_corner"
         android:padding="18dp"/>
 

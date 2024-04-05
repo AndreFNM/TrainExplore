@@ -97,4 +97,8 @@ dependencies {
     //para usar a biblioteca jBCrypt para BCrypt
     implementation ("org.mindrot:jbcrypt:0.4")
 
+    //para manter o login do utilizador e de forma segura
+    implementation ("androidx.security:security-crypto:1.0.0")
+
+
 }

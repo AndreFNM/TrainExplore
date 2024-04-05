@@ -20,6 +20,7 @@
     <string name="data_estacao">Data de Fundação da estação</string>
     <string name="estado_estacao">Estado atual da estação</string>
     <string name="acessibilidade_invalida">Esta Estação não tem pontos de Acessibilidade</string>
+    <string name="logoutText">Logout</string>
 
 
 </resources>

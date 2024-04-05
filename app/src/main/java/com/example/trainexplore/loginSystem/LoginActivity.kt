@@ -4,11 +4,14 @@ package com.example.trainexplore.loginSystem
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.example.trainexplore.Comboios
 import com.example.trainexplore.MainActivity
 import com.example.trainexplore.R
@@ -49,6 +52,17 @@ class LoginActivity : AppCompatActivity() {
     private fun loginUtilizador(email: String, pass: String) {
         lifecycleScope.launch {
             if (repository.validarUtilizador(email, pass)) {
+                //guardar o login
+                val sharedPreferences = EncryptedSharedPreferences.create(
+                    "MeuPerfil",
+                    MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+                    applicationContext,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+                sharedPreferences.edit().putBoolean("IsUtilizadorLoggedIn",true).apply()
+
+
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()

@@ -29,7 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "TrainExploreDB"
                 )
                     .createFromAsset("TrainExplore.db")
-                    .fallbackToDestructiveMigration()
+                    //.fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

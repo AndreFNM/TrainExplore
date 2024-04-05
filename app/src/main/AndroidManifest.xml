@@ -21,6 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity">
+        </activity>
 
         <activity
             android:name=".loginSystem.RegistarActivity">
@@ -40,9 +43,6 @@
 
         <activity
             android:name=".Comboios">
-        </activity>
-        <activity
-            android:name=".MainActivity">
         </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"

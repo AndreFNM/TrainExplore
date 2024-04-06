@@ -5,7 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.trainexplore.entities.Estacao
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.trainexplore.database.AppDatabase
+import com.example.trainexplore.database.FavoritosDB.FavoritoAdapter
+import com.example.trainexplore.loginSystem.SessionManager
 
 
 private const val ARG_PARAM1 = "param1"
@@ -31,6 +35,21 @@ class Favoritos : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_favoritos, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val recyclerView: RecyclerView = view.findViewById(R.id.favoritosRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        val adapter = FavoritoAdapter(emptyList())
+        recyclerView.adapter = adapter
+
+        val userId = SessionManager.userId?.toIntOrNull()
+        if (userId != null) {
+            AppDatabase.getDatabase(requireContext()).favoritoDao().getFavoritosEstacaoByUtilizador(userId).observe(viewLifecycleOwner) { estacoes ->
+                adapter.updateData(estacoes)
+            }
+        }
     }
 
     companion object {

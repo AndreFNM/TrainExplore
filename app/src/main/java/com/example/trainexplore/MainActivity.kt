@@ -9,6 +9,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.example.trainexplore.databinding.ActivityMainBinding
 import com.example.trainexplore.loginSystem.LoginActivity
+import com.example.trainexplore.loginSystem.SessionManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,18 +41,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkLoginStatus() {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            "MeuPerfil",
-            masterKeyAlias,
-            applicationContext,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        val isUtilizadorLoggedIn = sharedPreferences.getBoolean("IsUtilizadorLoggedIn",false)
-
-        if (!isUtilizadorLoggedIn) {
+        if (SessionManager.userId == null) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }

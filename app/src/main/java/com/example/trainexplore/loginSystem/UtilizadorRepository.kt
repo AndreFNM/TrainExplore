@@ -15,10 +15,13 @@ class UtilizadorRepository (private val db: AppDatabase) {
         }
     }
 
-    suspend fun validarUtilizador(email: String, pass: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun validarUtilizador(email: String, pass: String): Int? = withContext(Dispatchers.IO) {
         val utilizador = db.utilizadorDao().getUserByEmail(email)
-        utilizador?.let {
-            BCrypt.checkpw(pass, it.pass)
-        }?: false
+        if (utilizador != null && BCrypt.checkpw(pass, utilizador.pass)) {
+            return@withContext utilizador.id // dá return ao id em caso de login com sucesso
+        } else {
+            //falha no login
+            return@withContext null
+        }
     }
 }

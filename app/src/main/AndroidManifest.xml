@@ -44,6 +44,9 @@
         <activity
             android:name=".Comboios">
         </activity>
+        <activity
+            android:name=".loginSystem.MyApp">
+        </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />

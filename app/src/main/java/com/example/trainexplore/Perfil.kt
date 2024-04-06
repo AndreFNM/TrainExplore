@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.trainexplore.loginSystem.LoginActivity
+import com.example.trainexplore.loginSystem.SessionManager
 
 
 private const val ARG_PARAM1 = "param1"
@@ -20,7 +21,7 @@ class Perfil : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var logoutButton: Button
-    private lateinit var sharedPreferences: SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,20 +43,17 @@ class Perfil : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         logoutButton = view.findViewById(R.id.logoutButton)
-        sharedPreferences = requireActivity().getSharedPreferences("MeuPerfil", AppCompatActivity.MODE_PRIVATE)
 
         logoutButton.setOnClickListener {
-            //apaga os dados da sharedPreferences de um utilizador e faz o logout
-            sharedPreferences.edit().putBoolean("IsUtilizadorLoggedIn",false).apply()
+            SessionManager.clearSession(requireContext())
 
-            //redirecional para LoginActivity
             val intent = Intent(activity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
 
-            //Como é um fragmento, esta função fecha a atividade principal
             requireActivity().finish()
         }
+
     }
 
     companion object {

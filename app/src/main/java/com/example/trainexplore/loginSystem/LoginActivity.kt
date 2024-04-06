@@ -1,7 +1,7 @@
-
 package com.example.trainexplore.loginSystem
 
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -51,25 +51,17 @@ class LoginActivity : AppCompatActivity() {
     }
     private fun loginUtilizador(email: String, pass: String) {
         lifecycleScope.launch {
-            if (repository.validarUtilizador(email, pass)) {
-                //guardar o login
-                val sharedPreferences = EncryptedSharedPreferences.create(
-                    "MeuPerfil",
-                    MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
-                    applicationContext,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                )
-                sharedPreferences.edit().putBoolean("IsUtilizadorLoggedIn",true).apply()
+            val IdUtilizador = repository.validarUtilizador(email, pass)
+            if (IdUtilizador != null) {
+                SessionManager.saveSessionData(IdUtilizador.toString(), applicationContext)
 
-
-                val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
             } else {
                 Toast.makeText(this@LoginActivity, "Email ou Password inválidos", Toast.LENGTH_LONG).show()
             }
         }
+
     }
 
 }

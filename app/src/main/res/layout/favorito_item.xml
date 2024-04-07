@@ -11,13 +11,14 @@ android:background="@drawable/rounded_blue">
     android:id="@+id/imagemViewEstacao"
     android:layout_width="100dp"
     android:layout_height="100dp"
-    android:src="@drawable/ic_launcher_background" />
+    android:src="@drawable/ic_stat_name" />
 
 <TextView
     android:id="@+id/nomeEstacaoFavorito"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
+    android:layout_marginTop="30dp"
     android:text="Station Info"
     android:textSize="18sp" />
 </LinearLayout>

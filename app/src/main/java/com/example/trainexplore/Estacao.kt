@@ -23,20 +23,32 @@ class Estacao : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.estacao)
 
-        //val estacaoId = intent.getIntExtra("estacao_id", -1)
+
         estacaoId = intent.getIntExtra("estacao_id",-1)
 
         if (estacaoId != -1) {
             val estacaoDao = AppDatabase.getDatabase(this).estacaoDao()
-            estacaoDao.getEstacaoById(estacaoId).observe(this, Observer { estacao ->
-                findViewById<TextView>(R.id.nomeViewEstacao).text = estacao.nome
+            estacaoDao.getEstacaoById(estacaoId).observe(this, Observer { fetchedEstacao ->
+                if (fetchedEstacao != null) {
+                    findViewById<TextView>(R.id.nomeViewEstacao).text = fetchedEstacao.nome
 
-                Glide.with(this)
-                    .load(estacao.foto)
-                    .into(findViewById(R.id.imagemViewEstacao))
+                    Glide.with(this)
+                        .load(fetchedEstacao.foto)
+                        .into(findViewById(R.id.imagemViewEstacao))
+
+                    findViewById<Button>(R.id.oberDirecoesButton).setOnClickListener {
+                        val intent = Intent(this, MapDirecoesActivity::class.java).apply {
+                            putExtra("latitude", fetchedEstacao.latitude)
+                            putExtra("longitude", fetchedEstacao.longitude)
+                        }
+                        startActivity(intent)
+                    }
+                } else {
+                    Toast.makeText(this, "Estacao nao encontrada", Toast.LENGTH_SHORT).show()
+                }
             })
         } else {
-            //dar aqui handle aos erros, por exemplo ID not found ou invalido
+            Toast.makeText(this, "Id de estacao invalido", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.buttonMostrarHistorico).setOnClickListener {
             val intent = Intent(this, Estacao_historico::class.java).apply {
@@ -69,7 +81,7 @@ class Estacao : AppCompatActivity() {
                 }
             }
         } else {
-            Toast.makeText(this, "Erro ao adicionar aos favorutos", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Erro ao adicionar estação aos favoritos", Toast.LENGTH_SHORT).show()
         }
     }
 }

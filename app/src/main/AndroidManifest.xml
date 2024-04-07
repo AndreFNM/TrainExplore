@@ -47,7 +47,16 @@
         <activity
             android:name=".loginSystem.MyApp">
         </activity>
+        <activity
+            android:name=".MapDirecoesActivity">
+        </activity>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w"
+            />
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 </manifest>

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.trainexplore.database.AppDatabase
 import com.example.trainexplore.database.FavoritosDB.FavoritoAdapter
+import com.example.trainexplore.entities.Estacao
 import com.example.trainexplore.loginSystem.SessionManager
 
 
@@ -17,7 +18,7 @@ private const val ARG_PARAM2 = "param2"
 
 
 class Favoritos : Fragment() {
-
+    private lateinit var adapter: FavoritoAdapter
     private var param1: String? = null
     private var param2: String? = null
 
@@ -41,7 +42,10 @@ class Favoritos : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val recyclerView: RecyclerView = view.findViewById(R.id.favoritosRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val adapter = FavoritoAdapter(emptyList())
+        adapter = FavoritoAdapter(emptyList()) { estacaoParaRemover ->
+            removerEstacaoFavoritos(estacaoParaRemover)
+
+        }
         recyclerView.adapter = adapter
 
         val userId = SessionManager.userId?.toIntOrNull()
@@ -51,6 +55,23 @@ class Favoritos : Fragment() {
             }
         }
     }
+
+    private fun removerEstacaoFavoritos(estacao: Estacao) {
+        val userId = SessionManager.userId?.toIntOrNull()
+        if (userId != null) {
+
+            Thread{
+                val dao = AppDatabase.getDatabase(requireContext()).favoritoDao()
+                dao.removerFavoritoByEstacaoId(estacao.id)
+
+                activity?.runOnUiThread {
+                    adapter.removerEstacao(estacao)
+                }
+            }.start()
+        }
+    }
+
+
 
     companion object {
         @JvmStatic

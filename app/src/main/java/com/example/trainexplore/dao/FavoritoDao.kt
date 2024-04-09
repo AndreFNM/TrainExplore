@@ -22,6 +22,7 @@ interface FavoritoDao {
     fun getFavoritosEstacaoByUtilizador(utilizadorId: Int): LiveData<List<Estacao>>
 
 
-
+    @Query("DELETE FROM Favorito WHERE estacaoId = :estacaoId")
+    fun removerFavoritoByEstacaoId(estacaoId: Int)
 
 }

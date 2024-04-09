@@ -21,4 +21,15 @@ android:background="@drawable/rounded_blue">
     android:layout_marginTop="30dp"
     android:text="Station Info"
     android:textSize="18sp" />
+
+    <ImageView
+        android:id="@+id/removerFavoritoButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="30dp"
+        android:contentDescription="@string/remover_favorito"
+        android:src="@drawable/ic_action_name" />
+
 </LinearLayout>

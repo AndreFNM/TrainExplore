@@ -76,6 +76,7 @@ dependencies {
 
     //dependencias google API's
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.android.gms:play-services-location:21.2.0")
 
     // Dependências para @ApplicationContect
     implementation("com.google.dagger:hilt-android:2.38.1")
@@ -83,7 +84,7 @@ dependencies {
 
     //dependencias para usar LiveData<>
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
 

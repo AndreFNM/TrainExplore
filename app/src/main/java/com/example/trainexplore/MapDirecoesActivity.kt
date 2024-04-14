@@ -20,9 +20,12 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import android.provider.Settings
+import android.util.Log
+import android.widget.Button
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.PolyUtil
@@ -30,6 +33,7 @@ import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
@@ -41,6 +45,123 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object{
         private const val LOCATION_REQUEST_CODE = 101
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.direcoes_map_activity)
+
+        // Initialize location services components
+        createLocationRequest()
+        createLocationCallback()
+
+        // Initialize FusedLocationProviderClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Request location permissions
+        requestPermissaoLocalizacao()
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        setupMap()
+    }
+
+    private fun setupMap() {
+        map?.let { safeMap ->
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_REQUEST_CODE)
+                return
+            }
+            safeMap.isMyLocationEnabled = true
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val userLocation = LatLng(it.latitude, it.longitude)
+                    val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
+                    calcularRota(userLocation, destinationLatLng)
+                } ?: Toast.makeText(this, "Localização atual não disponível.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun calcularRota(origem: LatLng, destino: LatLng) {
+        fetchRoute(origem, destino)
+        map?.let { safemap ->
+            safemap.addMarker(MarkerOptions().position(destino).title("Estacao"))
+            safemap.moveCamera(CameraUpdateFactory.newLatLngZoom(destino, 15f))
+
+            val bounds = LatLngBounds.Builder()
+                .include(origem)
+                .include(destino)
+                .build()
+            val padding = 100
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+            safemap.animateCamera(cameraUpdate)
+        }
+    }
+
+    private fun fetchRoute(origin: LatLng, destination: LatLng) {
+        val apiKey = getApiKey()
+        val travelMode = "driving"
+        val url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                "origin=${origin.latitude},${origin.longitude}&" +
+                "destination=${destination.latitude},${destination.longitude}&" +
+                "mode=driving&" +
+                "key=$apiKey"
+
+        Log.d("MapDirecoesActivity","Requesting route with url: $url")
+
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@MapDirecoesActivity, "Falha ao encontrar uma rota: ${e.message}", Toast.LENGTH_LONG).show()
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                response.use { resp ->
+                    if (!resp.isSuccessful) {
+                        val errorBody = resp.body?.string() ?: "No details"
+                        Log.d("MapDirecoesActivity","Response failed with code ${resp.code} and message $errorBody")
+                        runOnUiThread {
+                            Toast.makeText(this@MapDirecoesActivity, "Resposta sem sucesso: ${resp.message} - $errorBody", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        val jsonData = resp.body?.string()
+                        Log.d("MapDirecoesActivity","Response Body: $jsonData")
+                        jsonData?.let {
+                            try {
+                                val jsonObject = JSONObject(it)
+                                val routes = jsonObject.getJSONArray("routes")
+                                if (routes.length() > 0) {
+                                    val polyline = routes.getJSONObject(0).getJSONObject("overview_polyline").getString("points")
+                                    val decodedPath = PolyUtil.decode(polyline)
+                                    runOnUiThread {
+                                        map?.addPolyline(PolylineOptions().addAll(decodedPath).color(android.graphics.Color.RED).width(8f))
+                                    }
+                                } else {
+                                    runOnUiThread {
+                                        Toast.makeText(this@MapDirecoesActivity, "Nenhuma rota encontrada", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            } catch (e: JSONException) {
+                                e.printStackTrace()
+                                runOnUiThread {
+                                    Toast.makeText(this@MapDirecoesActivity, "Erro ao processar a rota: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })
     }
 
     private fun checkServicosLocalizacaoERequestLocalizacao() {
@@ -97,22 +218,6 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.direcoes_map_activity)
-
-        // inicializar FusedLocationProviderClient
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        //Pedir permissões
-        requestPermissaoLocalizacao()
-
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-    }
-
     private fun requestPermissaoLocalizacao() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -142,7 +247,9 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        if (this::locationCallback.isInitialized) {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
     }
 
     private fun enableLocalizacao() {
@@ -181,76 +288,20 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
-        setupMap()
-    }
 
-    private fun setupMap() {
-        map?.let { safemap ->
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                safemap.isMyLocationEnabled = true
-                enableLocalizacao()
-            } else {
-                requestPermissaoLocalizacao()
-            }
-
-            val destinoLatitude = intent.getDoubleExtra("latitude", 0.0)
-            val destinoLongitude = intent.getDoubleExtra("longitude", 0.0)
-            val destinoLocalizacao = LatLng(destinoLatitude, destinoLongitude)
-
-            safemap.addMarker(MarkerOptions().position(destinoLocalizacao).title("Estacao"))
-            safemap.moveCamera(CameraUpdateFactory.newLatLngZoom(destinoLocalizacao,15f))
-
-            calcularRota(destinoLocalizacao)
+    private fun getApiKey(): String {
+        try {
+            val applicationInfo = this.packageManager.getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
+            val bundle = applicationInfo.metaData
+            return bundle.getString("com.google.android.geo.API_KEY") ?: throw IllegalStateException("API key não encontrada em android manifest")
+        } catch (e: PackageManager.NameNotFoundException) {
+            throw IllegalStateException("Falha a dar load as dados, NomeNaoEncontrado: ${e.message}")
+        } catch (e: NullPointerException) {
+            throw IllegalStateException("Falha a dar load as dados, PonteiroNull: ${e.message}")
         }
     }
 
 
-    private fun fetchRoute(origin: LatLng, destino: LatLng) {
-        val url = "https://api.example.com/route?origin=${origin.latitude},${origin.longitude}&destination=${destino.latitude},${destino.longitude}&key=YOUR_API_KEY"
-        val client = OkHttpClient()
-        val request = Request.Builder().url(url).build()
 
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@MapDirecoesActivity, "Falha ao calcular a rota: ${e.message}",Toast.LENGTH_LONG).show()
-                }
-            }
 
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.use { resp ->
-                    if (!resp.isSuccessful) {
-                        runOnUiThread {
-                            Toast.makeText(this@MapDirecoesActivity, "Resposta sem sucesso", Toast.LENGTH_LONG).show()
-                        }
-                    } else {
-                        val jsonData = resp.body?.string()
-                        jsonData?.let {
-                            val jsonObject = JSONObject(it)
-                            val polyline = jsonObject.getJSONArray("rotas").getJSONObject(0).getJSONObject("overview_polyline").getString("pontos")
-                            val decodedPath = PolyUtil.decode(polyline)
-                            runOnUiThread {
-                                map?.addPolyline(PolylineOptions().addAll(decodedPath).color(android.graphics.Color.RED).width(8f))
-                            }
-                        }
-                    }
-                }
-            }
-        } )
-    }
-
-    private fun calcularRota(destino: LatLng) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { localizacao ->
-                localizacao?.let {
-                    val origin = LatLng(it.latitude, it.longitude)
-                    fetchRoute(origin, destino)
-                }
-            }
-        } else {
-            requestPermissaoLocalizacao()
-        }
-    }
 }

@@ -16,12 +16,28 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import android.provider.Settings
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.PolyUtil
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
+import java.io.IOException
+
 class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
     private var  map: GoogleMap? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
 
     companion object{
         private const val LOCATION_REQUEST_CODE = 101
@@ -61,6 +77,27 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
             .show()
     }
 
+    private fun createLocationRequest() {
+        locationRequest = LocationRequest.create().apply {
+            interval = 10000  // Update location every 10 seconds
+            fastestInterval = 5000  // Maximum rate at which your app can handle updates
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+    }
+
+
+    private fun createLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    val userLocation = LatLng(location.latitude, location.longitude)
+                    map?.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                }
+            }
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.direcoes_map_activity)
@@ -88,6 +125,24 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         checkServicosLocalizacaoERequestLocalizacao()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
+    }
+
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        } else {
+            //se as permissões não forem garantidas
+            requestPermissaoLocalizacao()
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun enableLocalizacao() {
@@ -128,19 +183,74 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        setupMap()
+    }
 
+    private fun setupMap() {
+        map?.let { safemap ->
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                safemap.isMyLocationEnabled = true
+                enableLocalizacao()
+            } else {
+                requestPermissaoLocalizacao()
+            }
+
+            val destinoLatitude = intent.getDoubleExtra("latitude", 0.0)
+            val destinoLongitude = intent.getDoubleExtra("longitude", 0.0)
+            val destinoLocalizacao = LatLng(destinoLatitude, destinoLongitude)
+
+            safemap.addMarker(MarkerOptions().position(destinoLocalizacao).title("Estacao"))
+            safemap.moveCamera(CameraUpdateFactory.newLatLngZoom(destinoLocalizacao,15f))
+
+            calcularRota(destinoLocalizacao)
+        }
+    }
+
+
+    private fun fetchRoute(origin: LatLng, destino: LatLng) {
+        val url = "https://api.example.com/route?origin=${origin.latitude},${origin.longitude}&destination=${destino.latitude},${destino.longitude}&key=YOUR_API_KEY"
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@MapDirecoesActivity, "Falha ao calcular a rota: ${e.message}",Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                response.use { resp ->
+                    if (!resp.isSuccessful) {
+                        runOnUiThread {
+                            Toast.makeText(this@MapDirecoesActivity, "Resposta sem sucesso", Toast.LENGTH_LONG).show()
+                        }
+                    } else {
+                        val jsonData = resp.body?.string()
+                        jsonData?.let {
+                            val jsonObject = JSONObject(it)
+                            val polyline = jsonObject.getJSONArray("rotas").getJSONObject(0).getJSONObject("overview_polyline").getString("pontos")
+                            val decodedPath = PolyUtil.decode(polyline)
+                            runOnUiThread {
+                                map?.addPolyline(PolylineOptions().addAll(decodedPath).color(android.graphics.Color.RED).width(8f))
+                            }
+                        }
+                    }
+                }
+            }
+        } )
+    }
+
+    private fun calcularRota(destino: LatLng) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            enableLocalizacao()
+            fusedLocationClient.lastLocation.addOnSuccessListener { localizacao ->
+                localizacao?.let {
+                    val origin = LatLng(it.latitude, it.longitude)
+                    fetchRoute(origin, destino)
+                }
+            }
         } else {
             requestPermissaoLocalizacao()
         }
-        /**
-        val latitude = intent.getDoubleExtra("latitude",0.0)
-        val longitude = intent.getDoubleExtra("longitude",0.0)
-        val localizacaoEstacao = LatLng(latitude, longitude)
-
-        map.addMarker(MarkerOptions().position(localizacaoEstacao).title("Estacao"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(localizacaoEstacao, 15f))
-        **/
     }
 }

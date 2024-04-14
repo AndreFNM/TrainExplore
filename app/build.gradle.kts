@@ -101,5 +101,9 @@ dependencies {
     //para manter o login do utilizador e de forma segura
     implementation ("androidx.security:security-crypto:1.0.0")
 
+    //para pedidos HTTPS
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+
+    implementation ("com.google.maps.android:android-maps-utils:2.2.0")
 
 }

@@ -77,6 +77,8 @@ dependencies {
     //dependencias google API's
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
     implementation ("com.google.android.gms:play-services-location:21.2.0")
+    implementation ("com.google.android.libraries.places:places:3.4.0")
+
 
     // Dependências para @ApplicationContect
     implementation("com.google.dagger:hilt-android:2.38.1")
@@ -105,5 +107,10 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
 
     implementation ("com.google.maps.android:android-maps-utils:2.2.0")
+
+    implementation ("com.google.android.material:material:1.11.0")
+
+    implementation ("com.google.maps.android:maps-ktx:3.2.0")
+
 
 }

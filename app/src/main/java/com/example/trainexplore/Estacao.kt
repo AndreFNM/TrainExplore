@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.trainexplore.database.AppDatabase
+import com.example.trainexplore.PoiMapActivity
 import com.example.trainexplore.entities.Favorito
 import com.example.trainexplore.loginSystem.SessionManager
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +44,15 @@ class Estacao : AppCompatActivity() {
                         }
                         startActivity(intent)
                     }
+
+                    findViewById<Button>(R.id.buttonObterPontosInteresse).setOnClickListener {
+                        val intent = Intent(this, PoiMapActivity::class.java).apply {
+                            putExtra("latitude", fetchedEstacao.latitude)
+                            putExtra("longitude", fetchedEstacao.longitude)
+                        }
+                        startActivity(intent)
+                    }
+
                 } else {
                     Toast.makeText(this, "Estacao nao encontrada", Toast.LENGTH_SHORT).show()
                 }

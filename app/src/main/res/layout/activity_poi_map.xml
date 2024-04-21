@@ -4,19 +4,19 @@
     android:layout_height="match_parent">
 
     <fragment
-        android:id="@+id/poiMap"
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/poi_list"
+    <!-- Bottom Sheet for displaying place details
+    <include
+        layout="@layout/place_item_view"
+        android:id="@+id/place_details_layout"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        app:behavior_peekHeight="60dp"
-        android:background="@android:color/white" /> <!-- Adjust the background as needed -->
-
+        android:layout_gravity="bottom"
+        android:visibility="gone"/>
+-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-

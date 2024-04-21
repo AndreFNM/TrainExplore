@@ -51,7 +51,13 @@
         <activity
             android:name=".MapDirecoesActivity">
         </activity>
-        <activity android:name=".PoiMapActivity"/>
+        <activity android:name=".PoiMapActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

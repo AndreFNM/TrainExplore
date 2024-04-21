@@ -22,6 +22,7 @@
     <string name="acessibilidade_invalida">Esta Estação não tem pontos de Acessibilidade</string>
     <string name="logoutText">Logout</string>
     <string name="remover_favorito">Remover Favorito</string>
+    <string name="place_imagem">Imagem do local de interesse</string>
 
 
 </resources>

@@ -1,131 +1,108 @@
 package com.example.trainexplore
 
-
-import PlacesAdapter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.example.trainexplore.R
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.maps.model.Marker
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
-import java.lang.reflect.Field
-
 
 class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var map: GoogleMap
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<RecyclerView>
-    private lateinit var poiAdapter: PlacesAdapter
+
+    private lateinit var mMap: GoogleMap
     private lateinit var placesClient: PlacesClient
+    private lateinit var estacaoLocation: LatLng
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_poi_map)
+        initializePlaces()
+        setUpMapFragment()
+    }
 
-        val apiKey = getApiKey()  // Correctly retrieving the API key
+    private fun initializePlaces() {
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, apiKey)
-            placesClient = Places.createClient(this)
+            Places.initialize(applicationContext,"AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w")
         }
+        placesClient = Places.createClient(this)
+    }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.poiMap) as SupportMapFragment?
+    private fun setUpMapFragment() {
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
-
-        setupRecyclerView()
     }
 
-    private fun getApiKey(): String {
-        val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-        return applicationInfo.metaData.getString("com.google.android.geo.API_KEY") ?: throw IllegalStateException("API key not found in manifest")
-    }
-
-
-
-    private fun setupRecyclerView() {
-        val poiList = findViewById<RecyclerView>(R.id.poi_list)
-        poiAdapter = PlacesAdapter()
-        poiList.adapter = poiAdapter
-        poiList.layoutManager = LinearLayoutManager(this)
-        bottomSheetBehavior = BottomSheetBehavior.from(poiList).apply {
-            peekHeight = 300
-            state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-    }
-
-    @SuppressLint("PotentialBehaviorOverride")
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
-        map = googleMap
+        mMap = googleMap
+        estacaoLocation = LatLng(
+            intent.getDoubleExtra("latitude", 0.0),
+            intent.getDoubleExtra("longitude", 0.0)
+        )
 
-        // Setup the initial view of the map
-        val stationLocation = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
-        map.addMarker(MarkerOptions().position(stationLocation).title("Station"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(stationLocation, 15f))
-
-        // Set a marker click listener
-        map.setOnMarkerClickListener { marker ->
-            // You could retrieve and show details about the place here
-            false // Return false to show the default info window
-        }
-
-        // Set custom info window adapter
-        map.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
-            override fun getInfoWindow(marker: Marker): View? = null // Use default frame
-
-            @SuppressLint("InflateParams")
-            override fun getInfoContents(marker: Marker): View {
-                // Inflate and return a custom view here
-                val view = layoutInflater.inflate(R.layout.place_item_view, null)
-                val textView: TextView = view.findViewById(R.id.placeName)
-                textView.text = marker.title // Set the marker's title as text
-                return view
-            }
-        })
-
-        // Load places of interest around the station
-        loadNearbyPlaces(stationLocation)
-    }
-
-    private fun loadNearbyPlaces(location: LatLng) {
-        // Define a query to search for coffee shops or other categories
-        val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
-        val request = FindCurrentPlaceRequest.newInstance(placeFields)
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            placesClient.findCurrentPlace(request).addOnSuccessListener { response ->
-                for (placeLikelihood in response.placeLikelihoods) {
-                    val place = placeLikelihood.place
-                    map.addMarker(MarkerOptions().position(place.latLng ?: location).title(place.name))
-                }
-            }.addOnFailureListener { exception ->
-                if (exception is ApiException) {
-                    Log.e("PlacesAPI", "Place not found: ${exception.statusCode}")
-                }
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+            mMap.isMyLocationEnabled = true
         } else {
-            // Request das permissoes em falta
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
+        }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(estacaoLocation, 15f))
+        mMap.setOnPoiClickListener { poi ->
+            val placeId = poi.placeId
+            fetchPlaceDetails(placeId)
         }
     }
 
-    companion object {
-        private const val REQUEST_LOCATION_PERMISSION = 1
+    private fun fetchPlaceDetails(placeId: String) {
+        val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG)
+        val fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(fetchPlaceRequest).addOnSuccessListener { response ->
+            val place = response.place
+            // Display place details as needed
+            Log.i("PlaceDetails", "${place.name}, ${place.address}, ${place.latLng}")
+            // You could update the UI here
+        }.addOnFailureListener { exception ->
+            if (exception is ApiException) {
+                val statusCode = exception.statusCode
+                Log.e("PlaceDetails", "Place not found: ${exception.message}, statusCode: $statusCode")
+            }
+        }
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            100 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission was granted.
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                        mMap.isMyLocationEnabled = true
+                    }
+                } else {
+                    // Permission denied, Disable the functionality that depends on this permission.
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+        }
+    }
+
 }

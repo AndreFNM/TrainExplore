@@ -41,7 +41,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/buttonDirecoes"
+            android:id="@+id/obterClimaButton"
             android:layout_width="160dp"
             android:layout_height="70dp"
             android:text="@string/ver_clima"

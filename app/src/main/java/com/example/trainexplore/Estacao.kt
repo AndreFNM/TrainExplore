@@ -53,6 +53,14 @@ class Estacao : AppCompatActivity() {
                         startActivity(intent)
                     }
 
+                    findViewById<Button>(R.id.obterClimaButton).setOnClickListener {
+                        val intent = Intent(this, ClimaActivity::class.java).apply {
+                            putExtra("latitude", fetchedEstacao.latitude)
+                            putExtra("longitude", fetchedEstacao.longitude)
+                        }
+                        startActivity(intent)
+                    }
+
                 } else {
                     Toast.makeText(this, "Estacao nao encontrada", Toast.LENGTH_SHORT).show()
                 }

@@ -58,7 +58,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
+<activity
+    android:name=".ClimaActivity">
+</activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w"

@@ -23,6 +23,7 @@
     <string name="logoutText">Logout</string>
     <string name="remover_favorito">Remover Favorito</string>
     <string name="place_imagem">Imagem do local de interesse</string>
+    <string name="imagem_place">Imagem do place</string>
 
 
 </resources>

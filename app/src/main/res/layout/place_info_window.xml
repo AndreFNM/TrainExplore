@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/rounded_info_window">
+
+    <ImageView
+        android:id="@+id/info_window_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/ic_launcher_background"
+        android:contentDescription="@string/imagem_place"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/info_window_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:paddingTop="5dp"
+        android:text="Place Name" />
+
+    <TextView
+        android:id="@+id/info_window_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:text="Place Address" />
+
+</LinearLayout>

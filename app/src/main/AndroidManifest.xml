@@ -22,54 +22,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity">
-        </activity>
-
-        <activity
-            android:name=".loginSystem.RegistarActivity">
-        </activity>
-
-        <activity
-            android:name=".Estacao">
-        </activity>
-
-        <activity
-            android:name=".Estacao_historico">
-        </activity>
-
-        <activity
-            android:name=".AcessibilidadeActivity">
-        </activity>
-
-        <activity
-            android:name=".Comboios">
-        </activity>
-        <activity
-            android:name=".loginSystem.MyApp">
-        </activity>
-        <activity
-            android:name=".MapDirecoesActivity">
-        </activity>
+        <activity android:name=".MainActivity"/>
+        <activity android:name=".loginSystem.RegistarActivity"/>
+        <activity android:name=".Estacao"/>
+        <activity android:name=".Estacao_historico"/>
+        <activity android:name=".AcessibilidadeActivity"/>
+        <activity android:name=".Comboios"/>
+        <activity android:name=".loginSystem.MyApp"/>
+        <activity android:name=".MapDirecoesActivity"
+            android:exported="true"/>
         <activity android:name=".PoiMapActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-<activity
-    android:name=".ClimaActivity">
-</activity>
+            android:exported="true"/>
+        <activity android:name=".ClimaActivity"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w"
             />
     </application>
-    <uses-permission android:name="android.permission.INTERNET"
-        tools:ignore="ManifestOrder" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 </manifest>

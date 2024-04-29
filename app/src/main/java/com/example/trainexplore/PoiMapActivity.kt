@@ -2,184 +2,227 @@ package com.example.trainexplore
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.common.api.ApiException
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.Request
-import com.bumptech.glide.request.RequestOptions
+import com.example.trainexplore.database.AppDatabase
+import com.example.trainexplore.entities.Favorito
+import com.example.trainexplore.entities.Ponto_interesse
+import com.example.trainexplore.loginSystem.SessionManager
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.InfoWindowAdapter {
+class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var placesClient: PlacesClient
     private lateinit var estacaoLocation: LatLng
     private var lastClickedMarker: Marker? = null
-
+    private lateinit var slidingPanel: SlidingUpPanelLayout
+    private var mapInteractionJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_poi_map)
-        initializePlaces()
-        setUpMapFragment()
-    }
-
-    private fun initializePlaces() {
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext,"AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w")
+            Places.initialize(applicationContext, getApiKey())
         }
         placesClient = Places.createClient(this)
+        setupMapFragment()
+        setupSlidingPanel()
+    }
+    private fun getApiKey(): String {
+        return packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA).metaData.getString("com.google.android.geo.API_KEY")
+            ?: throw IllegalStateException("API key not found in manifest")
     }
 
-    private fun setUpMapFragment() {
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
+    private fun setupSlidingPanel() {
+        slidingPanel = findViewById(R.id.sliding_layout)
+        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN) // Ensure the panel is initially hidden
+
+        slidingPanel.addPanelSlideListener(object : SlidingUpPanelLayout.PanelSlideListener {
+            override fun onPanelSlide(panel: View, slideOffset: Float) {
+                // You can adjust the opacity or appearance of elements based on slideOffset if needed
+            }
+
+            override fun onPanelStateChanged(panel: View, previousState: SlidingUpPanelLayout.PanelState, newState: SlidingUpPanelLayout.PanelState) {
+                // Use this to handle state changes if necessary
+            }
+        })
+
+        // Allow the user to tap outside the panel to collapse it
+        slidingPanel.setFadeOnClickListener {
+            slidingPanel.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
+        }
+
+        findViewById<Button>(R.id.buttonObterDirecoesPlaces).setOnClickListener {
+            lastClickedMarker?.tag?.let { it as? Place }?.also { navigateToMapDirecoesActivity(it) }
+        }
+
+        findViewById<Button>(R.id.buttonAddFavPlaces).setOnClickListener {
+            lastClickedMarker?.let { addPlaceToFavorites(it) }
+        }
+
+        findViewById<TextView>(R.id.textViewClosePanel).setOnClickListener {
+            slidingPanel.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
+        }
+
+
     }
 
-    @SuppressLint("MissingPermission", "PotentialBehaviorOverride")
+
+    @SuppressLint("MissingPermission")
+    private fun setupMapFragment() {
+        (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.getMapAsync(this)
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        estacaoLocation = LatLng(
-            intent.getDoubleExtra("latitude", 0.0),
-            intent.getDoubleExtra("longitude", 0.0)
-        )
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
-            mMap.isMyLocationEnabled = true
-        } else {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
-        }
-
+        estacaoLocation = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
+        requestLocationPermission()
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(estacaoLocation, 15f))
-        mMap.setInfoWindowAdapter(this)
-        mMap.setOnPoiClickListener { poi ->
-            val placeId = poi.placeId
-            fetchPlaceDetails(placeId)
-        }
+        setupMapListeners()
     }
 
-
-    override fun getInfoWindow(marker: Marker): View {
-        val infoWindow = layoutInflater.inflate(R.layout.place_info_window, null)
-        renderInfoWindowContents(marker, infoWindow)
-        return infoWindow
-    }
-
-    private fun renderInfoWindowContents(marker: Marker, infoWindow: View) {
-        val title = infoWindow.findViewById<TextView>(R.id.info_window_title)
-        val address = infoWindow.findViewById<TextView>(R.id.info_window_address)
-        val image = infoWindow.findViewById<ImageView>(R.id.info_window_image)
-
-        title.text = marker.title
-        address.text = marker.snippet
-
-        // Handle the bitmap from the tag, if it's a Bitmap object.
-        val bitmap = marker.tag as? Bitmap
-        if (bitmap != null) {
-            image.setImageBitmap(bitmap)
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
         } else {
-            // Here, you might set a default image or handle the case when there's no image.
-            image.setImageResource(R.drawable.ic_launcher_background)  // Replace with your default image.
+            mMap.isMyLocationEnabled = true
+        }
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
+    private fun setupMapListeners() {
+        mMap.setOnPoiClickListener { poi -> fetchPlaceDetails(poi.placeId) }
+        mMap.setOnMarkerClickListener { marker ->
+            (marker.tag as? Place)?.let { showPlaceDetails(it) }
+            true
+        }
+    }
+
+    private fun showPlaceDetails(place: Place) {
+        mapInteractionJob?.cancel()
+        mapInteractionJob = lifecycleScope.launch {
+            updateUIWithPlaceDetails(place)
         }
     }
 
 
-    override fun getInfoContents(marker: Marker): View? {
-        // This method is not used in this case but must be overridden
-        return null
+    private suspend fun updateUIWithPlaceDetails(place: Place) = withContext(Dispatchers.Main) {
+        findViewById<TextView>(R.id.place_name).text = place.name
+        findViewById<TextView>(R.id.place_street).text = place.address
+        place.photoMetadatas?.firstOrNull()?.let { fetchPhotoAndDisplay(it, findViewById(R.id.place_image)) }
+        slidingPanel.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
     }
-
-    // Helper method to render the info window contents
 
 
     private fun fetchPlaceDetails(placeId: String) {
-        val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS)
-        val fetchPlaceRequest = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-        placesClient.fetchPlace(fetchPlaceRequest).addOnSuccessListener { response ->
+        val request = FetchPlaceRequest.newInstance(placeId, listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS))
+        placesClient.fetchPlace(request).addOnSuccessListener { response ->
             val place = response.place
-            Log.i("PlaceDetails", "${place.name}, ${place.address}, ${place.latLng}")
+            lastClickedMarker = mMap.addMarker(MarkerOptions().position(place.latLng!!).title(place.name).snippet(place.address).icon(
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
+            lastClickedMarker?.tag = place
+            showPlaceDetails(place) // Directly show details
+        }.addOnFailureListener { exception ->
+            Log.e("fetchPlaceDetails", "Erro ao obter os locais: ", exception)
+        }
+    }
 
-            val markerOptions = MarkerOptions()
-                .position(place.latLng!!)
-                .title(place.name)
-                .snippet(place.address)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
 
-            // Create a marker and store it in a variable so you can set the tag later.
-            val marker = mMap.addMarker(markerOptions)
-            marker?.tag = null  // Set the tag to null initially.
-            marker?.showInfoWindow()
+    private fun fetchPhotoAndDisplay(photoMetadata: PhotoMetadata, imageView: ImageView) {
+        val request = FetchPhotoRequest.builder(photoMetadata).build()
+        placesClient.fetchPhoto(request).addOnSuccessListener { fetchPhotoResponse ->
+            imageView.setImageBitmap(fetchPhotoResponse.bitmap)
+        }.addOnFailureListener {
+            imageView.setImageResource(R.drawable.ic_launcher_background)
+            Log.e("PoiMapActivity", "Erro ao obter a foto.")
+        }
+    }
 
-            // Get the photo metadata and fetch the bitmap
-            place.photoMetadatas?.firstOrNull()?.let { photoMetadata ->
-                val photoRequest = FetchPhotoRequest.builder(photoMetadata).build()
-                placesClient.fetchPhoto(photoRequest).addOnSuccessListener { fetchPhotoResponse ->
-                    val bitmap = fetchPhotoResponse.bitmap
-                    marker?.tag = bitmap  // Now, set the tag of the marker to the fetched bitmap.
-                    updateInfoWindow(marker)  // Call this method to refresh the info window.
-                }.addOnFailureListener { exception ->
-                    Log.e("PlacePhotos", "Photo not found: ${exception.localizedMessage}")
+
+    private fun navigateToMapDirecoesActivity(place: Place) {
+        Intent(this, MapDirecoesActivity::class.java).also { intent ->
+            intent.putExtra("latitude", place.latLng?.latitude)
+            intent.putExtra("longitude", place.latLng?.longitude)
+            startActivity(intent)
+        }
+        Log.d("PoiMapActivity", "A Navegar para MapDirecoesActivity com a localização: ${place.latLng}")
+    }
+
+    override fun onDestroy() {
+        mapInteractionJob?.cancel()
+        super.onDestroy()
+    }
+
+    private fun addPlaceToFavorites(marker: Marker) {
+        val place = marker.tag as? Place ?: return
+        val userId = SessionManager.userId?.toInt() ?: return
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getDatabase(applicationContext)
+            val pontoInteresseDao = db.pontoInteressedao()
+            val favoritoDao = db.favoritoDao()
+
+            val placeLatLng = place.latLng
+            if (placeLatLng != null) {
+                val existingPontoInteresse = pontoInteresseDao.getPontoInteresseByNomeECoordenadas(place.name, placeLatLng.latitude, placeLatLng.longitude)
+                val pontoInteresseId = existingPontoInteresse?.id ?: pontoInteresseDao.insertPontoInteresse(Ponto_interesse(0, place.name, placeLatLng.latitude, placeLatLng.longitude)).toInt()
+
+                val isAlreadyFavorite = favoritoDao.getFavoritoByUtilizadorIdEPontoInteresse(userId, pontoInteresseId) != null
+                if (!isAlreadyFavorite) {
+                    favoritoDao.addFavorito(Favorito(0, null, pontoInteresseId, userId))
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, "Ponto de interesse adicionado aos favoritos", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, "Ponto de interesse já pertence aos favoritos", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
-        }.addOnFailureListener { exception ->
-            Log.e("PlaceDetails", "Place not found: ${exception.localizedMessage}")
         }
     }
-
-    private fun updateInfoWindow(marker: Marker?) {
-        // Only update the info window if the marker is not null and the info window is already shown.
-        if (marker != null && marker.isInfoWindowShown) {
-            marker.showInfoWindow()
-        }
-    }
-
-
-
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            100 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission was granted.
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                        mMap.isMyLocationEnabled = true
-                    }
-                } else {
-                    // Permission denied, Disable the functionality that depends on this permission.
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
-                }
-                return
+        if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mMap.isMyLocationEnabled = true
             }
+        } else {
+            Toast.makeText(this, "Permissão recusada", Toast.LENGTH_SHORT).show()
         }
     }
-
 }

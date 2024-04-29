@@ -17,6 +17,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Any other UI elements can be added here with constraints -->
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

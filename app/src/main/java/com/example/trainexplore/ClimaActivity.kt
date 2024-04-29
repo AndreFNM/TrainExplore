@@ -37,7 +37,7 @@ interface WeatherService {
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String,
         @Query("units") units: String = "metric",
-        @Query("lang") lang: String = "pt"  
+        @Query("lang") lang: String = "pt"
     ): Call<WeatherResponse>
 }
 

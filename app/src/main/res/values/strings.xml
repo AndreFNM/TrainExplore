@@ -26,6 +26,9 @@
     <string name="imagem_place">Imagem do place</string>
     <string name="icon_clima">Icon do Clima</string>
     <string name="atualizar_clima">Atualizar Clima</string>
+    <string name="nome_local">Nome do Local</string>
+    <string name="rua_local">Rua do Local</string>
+    <string name="adicionarFavPlaces">Adicionar aos Favoritos</string>
 
 
 </resources>

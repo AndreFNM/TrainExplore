@@ -25,4 +25,7 @@ interface FavoritoDao {
     @Query("DELETE FROM Favorito WHERE estacaoId = :estacaoId")
     fun removerFavoritoByEstacaoId(estacaoId: Int)
 
+    @Query("SELECT * FROM Favorito WHERE utilizadorId =:utilizadorId AND pontoInteresseId =:pontoInteresseId LIMIT 1")
+    suspend fun getFavoritoByUtilizadorIdEPontoInteresse(utilizadorId: Int, pontoInteresseId: Int): Favorito?
+
 }

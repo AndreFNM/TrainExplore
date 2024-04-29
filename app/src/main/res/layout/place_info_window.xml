@@ -1,32 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="10dp"
-    android:background="@drawable/rounded_info_window">
+    android:padding="16dp"
+    android:layout_gravity="bottom">
+
+    <TextView
+        android:id="@+id/textViewClosePanel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Close"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:textAppearance="?attr/textAppearanceButton"
+        android:clickable="true"
+        android:focusable="true"
+        android:textColor="?attr/colorPrimary"
+        android:gravity="center"
+        android:background="?attr/selectableItemBackground" />
+
 
     <ImageView
-        android:id="@+id/info_window_image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/ic_launcher_background"
-        android:contentDescription="@string/imagem_place"
-        android:scaleType="centerCrop" />
+        android:id="@+id/place_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:layout_below="@+id/textViewClosePanel" />
 
     <TextView
-        android:id="@+id/info_window_title"
-        android:layout_width="wrap_content"
+        android:id="@+id/place_name"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingTop="5dp"
-        android:text="Place Name" />
+        android:layout_below="@id/place_image" />
 
     <TextView
-        android:id="@+id/info_window_address"
-        android:layout_width="wrap_content"
+        android:id="@+id/place_street"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:text="Place Address" />
+        android:layout_marginTop="4dp"
+        android:textSize="14sp"
+        android:layout_below="@id/place_name" />
 
-</LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonObterDirecoesPlaces"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/obter_direcoes"
+        android:backgroundTint="#0E6589"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_below="@id/place_street"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonAddFavPlaces"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/adicionarFavPlaces"
+        android:backgroundTint="#0E6589"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_below="@id/buttonObterDirecoesPlaces"/>
+
+</RelativeLayout>

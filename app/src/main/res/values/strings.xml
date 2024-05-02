@@ -29,6 +29,13 @@
     <string name="nome_local">Nome do Local</string>
     <string name="rua_local">Rua do Local</string>
     <string name="adicionarFavPlaces">Adicionar aos Favoritos</string>
+    <string name="fechar">Fechar</string>
+    <string name="nome_favorito">Nome do Favorito</string>
 
 
+    <string-array name="filtro_favoritos">
+        <item>Todos</item>
+        <item>Estações</item>
+        <item>Pontos de interesse</item>
+    </string-array>
 </resources>

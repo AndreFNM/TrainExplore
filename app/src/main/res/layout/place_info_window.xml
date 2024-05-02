@@ -11,7 +11,7 @@
         android:id="@+id/textViewClosePanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Close"
+        android:text="@string/fechar"
         android:layout_marginTop="16dp"
         android:padding="8dp"
         android:textAppearance="?attr/textAppearanceButton"

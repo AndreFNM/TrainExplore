@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:orientation="horizontal"
-android:padding="16dp"
-android:layout_marginBottom="8dp"
-android:background="@drawable/rounded_blue">
-
-<ImageView
-    android:id="@+id/imagemViewEstacao"
-    android:layout_width="100dp"
-    android:layout_height="100dp"
-    android:src="@drawable/ic_stat_name" />
-
-<TextView
-    android:id="@+id/nomeEstacaoFavorito"
-    android:layout_width="wrap_content"
+    android:id="@+id/item_layout"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="30dp"
-    android:text="Station Info"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/rounded_blue">
+
+    <ImageView
+        android:id="@+id/imagemViewEstacao"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/ic_stat_name" />
+
+    <TextView
+        android:id="@+id/nomeEstacaoFavorito"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="30dp"
+        android:maxWidth="200dp"
+    android:ellipsize="end"
+    android:text="@string/nome_favorito"
     android:textSize="18sp" />
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1" />
     <ImageView
         android:id="@+id/removerFavoritoButton"
         android:layout_width="50dp"
@@ -33,6 +33,5 @@ android:background="@drawable/rounded_blue">
         android:layout_marginTop="10dp"
         android:contentDescription="@string/remover_favorito"
         android:src="@drawable/ic_action_name"
-        android:layout_gravity="end"/>
-
+        android:layout_gravity="top|end"/>
 </LinearLayout>

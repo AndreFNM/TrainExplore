@@ -11,6 +11,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Transaction
 import com.example.trainexplore.entities.Estacao
 import com.example.trainexplore.entities.Favorito
+import com.example.trainexplore.entities.Ponto_interesse
 
 @Dao
 interface FavoritoDao {
@@ -21,6 +22,8 @@ interface FavoritoDao {
     @Query("SELECT * FROM Estacao WHERE id IN (SELECT estacaoId FROM Favorito WHERE UtilizadorId = :utilizadorId)")
     fun getFavoritosEstacaoByUtilizador(utilizadorId: Int): LiveData<List<Estacao>>
 
+    @Query("SELECT * FROM Ponto_interesse WHERE id IN (SELECT pontoInteresseId FROM Favorito WHERE utilizadorId = :utilizadorId)")
+    fun getFavoritosPontoInteresseByUtilizador(utilizadorId: Int): LiveData<List<Ponto_interesse>>
 
     @Query("DELETE FROM Favorito WHERE estacaoId = :estacaoId")
     fun removerFavoritoByEstacaoId(estacaoId: Int)

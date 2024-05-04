@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Test</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="login">Login</string>
     <string name="registar">Registar</string>
@@ -31,11 +30,22 @@
     <string name="adicionarFavPlaces">Adicionar aos Favoritos</string>
     <string name="fechar">Fechar</string>
     <string name="nome_favorito">Nome do Favorito</string>
+    <string name="comboios_de_portugal">Comboios de Portugal</string>
+    <string name="cp">CP</string>
+    <string name="titulo_noticia">Título da Notícia</string>
+    <string name="descricao_noticia">Descrição da Notícia</string>
 
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>
         <item>Estações</item>
         <item>Pontos de interesse</item>
+
+
+    </string-array>
+    <string-array name="filtro_noticias">
+        <item>All News</item>
+        <item>@string/comboios_de_portugal</item>
+        <item>@string/cp</item>
     </string-array>
 </resources>

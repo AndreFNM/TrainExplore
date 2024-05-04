@@ -1,59 +1,95 @@
 package com.example.trainexplore
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.trainexplore.noticias.NewsAdapter
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+interface NoticiasServico {
+    @GET("v2/everything")
+    suspend fun getNews(
+        @Query("q") query: String?,
+        @Query("qInTitle") qInTitle: String? = null,
+        @Query("sources") sources: String? = null,
+        @Query("domains") domains: String? = null,
+        @Query("language") language: String = "pt",
+        @Query("apiKey") apiKey: String
+    ): NoticiasResposta
+}
 
-/**
- * A simple [Fragment] subclass.
- * Use the [Noticias.newInstance] factory method to
- * create an instance of this fragment.
- */
+data class NoticiasResposta(val status: String, val totalResults: Int, val articles: List<NewsArticle>)
+
+data class NewsArticle(
+    val title: String,
+    val description: String,
+    val url: String,
+    val urlToImage: String
+)
+
+
 class Noticias : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: NewsAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_noticias, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Noticias.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Noticias().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        recyclerView = view.findViewById(R.id.newsRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        adapter = NewsAdapter(emptyList())
+        recyclerView.adapter = adapter
+        fetchNews()
     }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun fetchNews() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://newsapi.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        val newsService = retrofit.create(NoticiasServico::class.java)
+
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val response = newsService.getNews(query = "Comboios de Portugal OR CP", apiKey = "9442fe2ecbeb48f48fc7c7d196937dec")
+                if (response.status == "ok" && response.articles.isNotEmpty()) {
+                    Log.d("NewsAPI", "Fetched articles: ${response.articles}")
+                    val validArticles = response.articles.filter {
+                        it.title != "[Removed]" && it.description != "[Removed]"
+                    }
+                    GlobalScope.launch(Dispatchers.Main) {
+                        adapter.updateData(validArticles)
+                    }
+                } else {
+                    Log.e("NewsAPI", "Failed to fetch articles: Status: ${response.status}")
+                }
+            } catch (e: HttpException) {
+                Log.e("NewsAPI", "HTTP Error response: ${e.response()?.errorBody()?.string()}")
+            } catch (e: Exception) {
+                Log.e("NewsAPI", "Error fetching news", e)
+            }
+        }
+    }
+
+
+
 }
+
+

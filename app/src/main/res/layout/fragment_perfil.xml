@@ -14,7 +14,7 @@
             android:id="@+id/account_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="nformação da conta"
+            android:text="Informação da conta"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -65,12 +65,30 @@
                 android:text="@string/password"
                 android:textStyle="bold" />
 
+
             <EditText
-                android:id="@+id/edit_text_password"
+                android:id="@+id/pass_atual"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="a sua palavra passe" />
+                android:hint="@string/pass_atual"
+                android:inputType="textPassword" />
+
+
+            <EditText
+                android:id="@+id/nova_pass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/nova_pass"
+                android:inputType="textPassword" />
+
+
+            <EditText
+                android:id="@+id/confirmar_nova_pass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/confirmar_pass"
+                android:inputType="textPassword" />
+
         </LinearLayout>
 
         <LinearLayout

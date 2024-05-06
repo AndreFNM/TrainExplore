@@ -13,7 +13,7 @@ object SessionManager {
         private set
 
     fun saveSessionData(userId: String, context: Context) {
-        this.userId = userId // Set userId for in-memory access
+        this.userId = userId
 
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
         val sharedPreferences = EncryptedSharedPreferences.create(
@@ -56,4 +56,25 @@ object SessionManager {
             Log.e("SessionManager", "Failed to clear session",e)
         }
     }
+
+    fun getUserById(context: Context): Int {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        val sharedPreferences = EncryptedSharedPreferences.create(
+            PREF_FILE_NAME,
+            masterKeyAlias,
+            context.applicationContext,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+
+
+        return sharedPreferences.getString(USER_ID_KEY, "-1")?.toIntOrNull() ?: -1
+    }
+
+    fun saveUserId(context: Context, userId: Int) {
+        val editor = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE).edit()
+        editor.putInt(USER_ID_KEY, userId)
+        editor.apply()
+    }
+
 }

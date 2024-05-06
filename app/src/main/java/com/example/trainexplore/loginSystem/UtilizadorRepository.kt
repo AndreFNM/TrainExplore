@@ -24,4 +24,13 @@ class UtilizadorRepository (private val db: AppDatabase) {
             return@withContext null
         }
     }
+
+    //Fragment Perfil
+    suspend fun getUtilizadorById(id: Int): Utilizador? = withContext(Dispatchers.IO) {
+        db.utilizadorDao().getUserById(id)
+    }
+
+    suspend fun updateUtilizador(utilizador: Utilizador): Int = withContext(Dispatchers.IO) {
+        db.utilizadorDao().updateUser(utilizador)
+    }
 }

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -31,7 +32,11 @@ import com.example.trainexplore.database.AppDatabase
 import com.example.trainexplore.entities.Favorito
 import com.example.trainexplore.entities.Ponto_interesse
 import com.example.trainexplore.loginSystem.SessionManager
+import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback
+import com.google.android.gms.maps.StreetViewPanorama
+import com.google.android.gms.maps.SupportStreetViewPanoramaFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.StreetViewSource
 import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -41,7 +46,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
+class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback, OnStreetViewPanoramaReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var placesClient: PlacesClient
@@ -49,6 +54,7 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var lastClickedMarker: Marker? = null
     private lateinit var slidingPanel: SlidingUpPanelLayout
     private var mapInteractionJob: Job? = null
+    private lateinit var mStreetViewPanorama: StreetViewPanorama
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,11 +64,22 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         placesClient = Places.createClient(this)
         setupMapFragment()
+        setupMapAndStreetViewFragments()
         setupSlidingPanel()
+        setupStreetViewToggle()
     }
     private fun getApiKey(): String {
         return packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA).metaData.getString("com.google.android.geo.API_KEY")
             ?: throw IllegalStateException("API key not found in manifest")
+    }
+
+
+
+    private fun setupMapAndStreetViewFragments() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
+        val streetViewFragment = supportFragmentManager.findFragmentById(R.id.streetviewpanorama) as? SupportStreetViewPanoramaFragment
+        streetViewFragment?.getStreetViewPanoramaAsync(this)
     }
 
     private fun setupSlidingPanel() {
@@ -71,15 +88,12 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         slidingPanel.addPanelSlideListener(object : SlidingUpPanelLayout.PanelSlideListener {
             override fun onPanelSlide(panel: View, slideOffset: Float) {
-                // You can adjust the opacity or appearance of elements based on slideOffset if needed
             }
 
             override fun onPanelStateChanged(panel: View, previousState: SlidingUpPanelLayout.PanelState, newState: SlidingUpPanelLayout.PanelState) {
-                // Use this to handle state changes if necessary
             }
         })
 
-        // Allow the user to tap outside the panel to collapse it
         slidingPanel.setFadeOnClickListener {
             slidingPanel.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
         }
@@ -113,6 +127,24 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
         setupMapListeners()
     }
 
+    override fun onStreetViewPanoramaReady(panorama: StreetViewPanorama) {
+        mStreetViewPanorama = panorama
+        mStreetViewPanorama.setPosition(estacaoLocation, StreetViewSource.OUTDOOR)
+        findViewById<FrameLayout>(R.id.streetviewpanorama).visibility = View.GONE
+    }
+
+    private fun setupStreetViewToggle() {
+        findViewById<Button>(R.id.buttonToggleStreetView).setOnClickListener {
+            toggleStreetView()
+        }
+    }
+
+    @SuppressLint("CutPasteId")
+    private fun toggleStreetView() {
+        val streetViewVisibility = findViewById<FrameLayout>(R.id.streetviewpanorama).visibility
+        findViewById<FrameLayout>(R.id.streetviewpanorama).visibility = if (streetViewVisibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
@@ -123,10 +155,14 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("PotentialBehaviorOverride")
     private fun setupMapListeners() {
-        mMap.setOnPoiClickListener { poi -> fetchPlaceDetails(poi.placeId) }
+        mMap.setOnPoiClickListener { poi ->
+            fetchPlaceDetails(poi.placeId)
+        }
         mMap.setOnMarkerClickListener { marker ->
-            (marker.tag as? Place)?.let { showPlaceDetails(it) }
-            true
+            (marker.tag as? Place)?.let {
+                showPlaceDetails(it)
+                true
+            } ?: false
         }
     }
 
@@ -134,6 +170,7 @@ class PoiMapActivity : AppCompatActivity(), OnMapReadyCallback {
         mapInteractionJob?.cancel()
         mapInteractionJob = lifecycleScope.launch {
             updateUIWithPlaceDetails(place)
+            mStreetViewPanorama.setPosition(place.latLng!!, StreetViewSource.OUTDOOR)
         }
     }
 

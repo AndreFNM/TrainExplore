@@ -37,6 +37,7 @@
     <string name="pass_atual">Password Atual</string>
     <string name="nova_pass">Nova Password</string>
     <string name="confirmar_pass">Confirmar Password</string>
+    <string name="mostrar_estrada">Mostrar vista da estrada</string>
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>

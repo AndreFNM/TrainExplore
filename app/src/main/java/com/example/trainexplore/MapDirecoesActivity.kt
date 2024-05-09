@@ -106,7 +106,6 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                         override fun onMarkerDragStart(marker: Marker) {}
                         override fun onMarkerDrag(marker: Marker) {}
                         override fun onMarkerDragEnd(marker: Marker) {
-                            // Recalculate the route when the marker is released
                             calcularRota(userLocation, marker.position)
                         }
                     })
@@ -131,7 +130,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
 
     private fun displayRouteOnMap() {
-        val localPolyline = currentPolyline?.toList()  // Create a local copy at the beginning of the function
+        val localPolyline = currentPolyline?.toList()
 
         localPolyline?.let { safePolyline ->
             map?.addPolyline(
@@ -146,14 +145,12 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
     private fun shouldRecalculateRoute(currentLocation: Location): Boolean {
         val currentLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-        // Take a snapshot of the current polyline to ensure immutability within this scope
         val polyline = currentPolyline?.toList()
 
         return if (polyline != null) {
-            // Calculate the closest distance from current location to any point in the polyline
-            !PolyUtil.isLocationOnPath(currentLatLng, polyline, true, 100.0)  // Adjust geodesic and tolerance as needed
+            !PolyUtil.isLocationOnPath(currentLatLng, polyline, true, 100.0)
         } else {
-            true // If no route is currently available, consider recalculating.
+            true
         }
     }
     private fun fetchRoute(origin: LatLng, destination: LatLng) {
@@ -182,7 +179,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                                 val polyline = routes.getJSONObject(0).getJSONObject("overview_polyline").getString("points")
                                 currentPolyline = PolyUtil.decode(polyline)
                                 runOnUiThread {
-                                    routePolyline?.remove()  // Remove the existing polyline
+                                    routePolyline?.remove()
                                     routePolyline = map?.addPolyline(PolylineOptions().addAll(currentPolyline!!).color(android.graphics.Color.RED).width(8f))
                                     Toast.makeText(this@MapDirecoesActivity, "New route displayed.", Toast.LENGTH_SHORT).show()
                                 }

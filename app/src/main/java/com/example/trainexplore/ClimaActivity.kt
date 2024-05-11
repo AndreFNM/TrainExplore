@@ -1,6 +1,7 @@
 package com.example.trainexplore
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
@@ -58,13 +59,14 @@ class ClimaActivity : AppCompatActivity() {
     }
 
     private fun getWeather(latitude: Double, longitude: Double) {
+        val apiKey= getApiKey()
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.openweathermap.org/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val weatherService = retrofit.create(WeatherService::class.java)
-        val weatherCall = weatherService.getWeather(latitude, longitude, "b813dceb30c23ec40fd0b61990888903", "metric", "pt")
+        val weatherCall = weatherService.getWeather(latitude, longitude, apiKey, "metric", "pt")
 
         weatherCall.enqueue(object : Callback<WeatherResponse> {
             override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
@@ -81,6 +83,11 @@ class ClimaActivity : AppCompatActivity() {
                 Toast.makeText(this@ClimaActivity, "Erro: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun getApiKey(): String {
+        return packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA).metaData.getString("clima.API_KEY")
+            ?: throw IllegalStateException("API key não encontrada no manifest")
     }
 
     @SuppressLint("SetTextI18n")

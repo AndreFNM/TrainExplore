@@ -5,13 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.trainexplore.noticias.NewsAdapter
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -40,10 +42,10 @@ data class NewsArticle(
     val urlToImage: String
 )
 
-
 class Noticias : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: NewsAdapter
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_noticias, container, false)
@@ -55,18 +57,29 @@ class Noticias : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = NewsAdapter(emptyList())
         recyclerView.adapter = adapter
+
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener {
+            fetchNews()
+        }
+
         fetchNews()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun fetchNews() {
+        val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
+            Log.e("NewsAPI", "Erro a encontrar notícias", exception)
+            swipeRefreshLayout.isRefreshing = false
+            Toast.makeText(context, "Falha ao encontrar notícias. Por favor, tente mais tarde.", Toast.LENGTH_LONG).show()
+        }
+
         val retrofit = Retrofit.Builder()
             .baseUrl("https://newsapi.org/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         val newsService = retrofit.create(NoticiasServico::class.java)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             try {
                 val response = newsService.getNews(query = "Comboios de Portugal OR CP", apiKey = "9442fe2ecbeb48f48fc7c7d196937dec")
                 if (response.status == "ok" && response.articles.isNotEmpty()) {
@@ -74,22 +87,19 @@ class Noticias : Fragment() {
                     val validArticles = response.articles.filter {
                         it.title != "[Removed]" && it.description != "[Removed]"
                     }
-                    GlobalScope.launch(Dispatchers.Main) {
+                    launch(Dispatchers.Main) {
                         adapter.updateData(validArticles)
+                        swipeRefreshLayout.isRefreshing = false
                     }
                 } else {
                     Log.e("NewsAPI", "Failed to fetch articles: Status: ${response.status}")
+                    swipeRefreshLayout.isRefreshing = false
                 }
             } catch (e: HttpException) {
-                Log.e("NewsAPI", "HTTP Error response: ${e.response()?.errorBody()?.string()}")
-            } catch (e: Exception) {
-                Log.e("NewsAPI", "Error fetching news", e)
+                Log.e("NewsAPI", "HTTP resposta do erro: ${e.response()?.errorBody()?.string()}")
+                swipeRefreshLayout.isRefreshing = false
+                Toast.makeText(context, "Erro a conectar ao serviço.", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
-
 }
-
-

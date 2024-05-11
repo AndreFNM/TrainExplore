@@ -39,6 +39,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCTs0K1kW7N2QzvknvUU40btJLdk6DXB9w"
             />
+
+        <meta-data
+            android:name="clima.API_KEY"
+            android:value="b813dceb30c23ec40fd0b61990888903"/>
+        <meta-data
+            android:name="noticias.API_KEY"
+            android:value="9442fe2ecbeb48f48fc7c7d196937dec"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>

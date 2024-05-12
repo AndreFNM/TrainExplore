@@ -38,6 +38,8 @@
     <string name="nova_pass">Nova Password</string>
     <string name="confirmar_pass">Confirmar Password</string>
     <string name="mostrar_estrada">Mostrar vista da estrada</string>
+    <string name="clima_atual">Clima Atual</string>
+    <string name="guardar_ateracoes">Guardar Alterações</string>
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>

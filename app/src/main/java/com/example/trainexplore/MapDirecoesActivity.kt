@@ -26,12 +26,26 @@ import android.widget.TextView
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.tasks.Task
 import com.google.maps.android.SphericalUtil
+import android.text.Html
+
 
 data class NavigationStep(
     val instruction: String,
     val distance: String,
-    val polyline: List<LatLng>
+    val polyline: List<LatLng>,
+    val travelMode: String? = null,
+    val transitDetails: TransitDetails? = null
 )
+
+data class TransitDetails(
+    val departureStop: String,
+    val arrivalStop: String,
+    val vehicleType: String,
+    val lineName: String,
+    val headsign: String,
+    val numStops: Int
+)
+
 
 class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
     private var map: GoogleMap? = null
@@ -85,12 +99,19 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                 location?.let {
                     val userLatLng = LatLng(it.latitude, it.longitude)
                     val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
+                    // Clear the existing route before fetching a new one
+                    clearExistingPolyline()
                     fetchRoute(userLatLng, destinationLatLng)
                 } ?: Toast.makeText(this, "Localização atual não disponível.", Toast.LENGTH_SHORT).show()
             }
         } else {
             Toast.makeText(this, "Permissões de localização não garantidas", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun clearExistingPolyline() {
+        routePolyline?.remove()
+        routePolyline = null
     }
 
 
@@ -206,12 +227,9 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
 
 
-    private fun displayRouteOnMap() {
-        val path = ArrayList<LatLng>()
-        for (step in steps) {
-            path.addAll(step.polyline)
-        }
-        map?.addPolyline(PolylineOptions().addAll(path).color(android.graphics.Color.RED).width(8f))
+    private fun displayRouteOnMap(route: List<LatLng>) {
+        clearExistingPolyline()  // Ensure any previous route is removed
+        routePolyline = map?.addPolyline(PolylineOptions().addAll(route).color(android.graphics.Color.RED).width(8f))
     }
 
 
@@ -230,9 +248,11 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         val originParam = "origin=${origin.latitude},${origin.longitude}"
         val destinationParam = "destination=${destination.latitude},${destination.longitude}"
         val modeParam = "mode=$selectedTravelMode"
+        val languageParam = "language=pt-PT"  // Set language to Portuguese from Portugal
         val apiKeyParam = "key=${getApiKey()}"
-        return "https://maps.googleapis.com/maps/api/directions/json?$originParam&$destinationParam&$modeParam&$apiKeyParam"
+        return "https://maps.googleapis.com/maps/api/directions/json?$originParam&$destinationParam&$modeParam&$languageParam&$apiKeyParam"
     }
+
 
     private fun fetchRoute(origin: LatLng, destination: LatLng) {
         val url = buildDirectionsUrl(origin, destination)
@@ -259,10 +279,19 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     private fun showNextStep() {
         if (currentStepIndex < steps.size) {
             val currentStep = steps[currentStepIndex]
-            findViewById<TextView>(R.id.navigationInstructions).text = "${currentStep.instruction} in ${currentStep.distance}"
+            val transitInfo = currentStep.transitDetails
+            if (transitInfo != null) {
+                findViewById<TextView>(R.id.navigationInstructions).text = buildString {
+                    append("${currentStep.instruction} - Apanhe o ${transitInfo.lineName} em direção a ${transitInfo.headsign}.")
+                    append("\nDe ${transitInfo.departureStop} para ${transitInfo.arrivalStop}, ${transitInfo.numStops} Paragens.")
+                }
+            } else {
+                findViewById<TextView>(R.id.navigationInstructions).text = "${currentStep.instruction} in ${currentStep.distance}"
+            }
             currentStepIndex++
         }
     }
+
 
 
     private fun parseDirections(jsonData: String) {
@@ -272,23 +301,47 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
             val route = routes.getJSONObject(0)
             val legs = route.getJSONArray("legs")
             steps.clear()
+            val path = ArrayList<LatLng>()
+
             for (i in 0 until legs.length()) {
                 val leg = legs.getJSONObject(i)
                 val legSteps = leg.getJSONArray("steps")
                 for (j in 0 until legSteps.length()) {
                     val step = legSteps.getJSONObject(j)
-                    val instruction = step.getString("html_instructions").replace("<[^>]*>".toRegex(), "")
+                    val instruction = Html.fromHtml(step.getString("html_instructions")).toString()
                     val distance = step.getJSONObject("distance").getString("text")
                     val polyline = step.getJSONObject("polyline").getString("points")
-                    steps.add(NavigationStep(instruction, distance, PolyUtil.decode(polyline)))
+                    val decodedPath = PolyUtil.decode(polyline)
+                    val travelMode = step.getString("travel_mode")
+
+                    var transitDetails: TransitDetails? = null
+                    if (travelMode == "TRANSIT") {
+                        val transitInfo = step.getJSONObject("transit_details")
+                        transitDetails = TransitDetails(
+                            departureStop = transitInfo.getJSONObject("departure_stop").getString("name"),
+                            arrivalStop = transitInfo.getJSONObject("arrival_stop").getString("name"),
+                            vehicleType = transitInfo.getJSONObject("line").getJSONObject("vehicle").getString("type"),
+                            lineName = transitInfo.getJSONObject("line").getString("short_name"),
+                            headsign = transitInfo.getString("headsign"),
+                            numStops = transitInfo.getInt("num_stops")
+                        )
+                    }
+
+                    steps.add(NavigationStep(instruction, distance, decodedPath, travelMode, transitDetails))
+                    path.addAll(decodedPath)
                 }
             }
             runOnUiThread {
-                displayRouteOnMap()
-                showNextStep()  // Mostrar logo o primeiro passo
+                displayRouteOnMap(path)
+                if (steps.isNotEmpty()) {
+                    showNextStep()
+                }
             }
         }
     }
+
+
+
 
     private fun checkForNextStep(userLocation: LatLng) {
         if (currentStepIndex < steps.size && nearNextStep(userLocation, steps[currentStepIndex])) {

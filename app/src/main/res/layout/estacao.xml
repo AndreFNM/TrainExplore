@@ -17,17 +17,24 @@
         android:id="@+id/nomeViewEstacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="nome da estacao"
+        android:text="@string/nome_estacao"
         android:textSize="24sp"
         android:textStyle="bold" />
 
-    <ImageView
-        android:id="@+id/imagemViewEstacao"
-        android:layout_width="360dp"
-        android:layout_height="160dp"
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="30sp"
-        android:src="@drawable/ic_launcher_background"
-        />
+        android:background="@drawable/frame_picture">
+
+        <ImageView
+            android:id="@+id/imagemViewEstacao"
+            android:layout_width="200dp"
+            android:layout_height="160dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background" />
+    </FrameLayout>
+
 </LinearLayout>
 
 

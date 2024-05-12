@@ -18,6 +18,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:text="Station Info"
+        android:text="@string/nome_estacao"
         android:textSize="18sp" />
 </LinearLayout>

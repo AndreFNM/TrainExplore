@@ -102,14 +102,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Guardar alterações" />
+                android:text="@string/guardar_ateracoes"
+                android:backgroundTint="#0E6589"/>
 
             <Button
                 android:id="@+id/logoutButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/logoutText" />
+                android:text="@string/logoutText"
+                android:backgroundTint="#0E6589"/>
         </LinearLayout>
     </LinearLayout>
 

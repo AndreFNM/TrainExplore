@@ -25,10 +25,13 @@ interface FavoritoDao {
     @Query("SELECT * FROM Ponto_interesse WHERE id IN (SELECT pontoInteresseId FROM Favorito WHERE utilizadorId = :utilizadorId)")
     fun getFavoritosPontoInteresseByUtilizador(utilizadorId: Int): LiveData<List<Ponto_interesse>>
 
-    @Query("DELETE FROM Favorito WHERE estacaoId = :estacaoId")
-    fun removerFavoritoByEstacaoId(estacaoId: Int)
+    @Query("DELETE FROM Favorito WHERE estacaoId = :estacaoId AND utilizadorId = :utilizadorId")
+    fun removerFavoritoByEstacaoId(estacaoId: Int, utilizadorId: Int)
 
     @Query("SELECT * FROM Favorito WHERE utilizadorId =:utilizadorId AND pontoInteresseId =:pontoInteresseId LIMIT 1")
     suspend fun getFavoritoByUtilizadorIdEPontoInteresse(utilizadorId: Int, pontoInteresseId: Int): Favorito?
+
+    @Query("DELETE FROM Favorito WHERE pontoInteresseId = :pontoInteresseId AND utilizadorId = :utilizadorId")
+    fun removerFavoritoByPontoInteresseId(pontoInteresseId: Int, utilizadorId: Int)
 
 }

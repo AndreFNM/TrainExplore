@@ -29,10 +29,10 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
                 val user = userRepository.getUtilizadorById(userId)
                 _currentUser.value = user
                 if (user == null) {
-                    _errorMessages.value = "User not found."
+                    _errorMessages.value = "Utilizador não encontrado"
                 }
             } catch (e: Exception) {
-                _errorMessages.value = "Failed to load user data."
+                _errorMessages.value = "Falha ao carregar os dados do utilizador."
             }
         }
     }
@@ -51,10 +51,10 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
                 if (result > 0) {
                     _currentUser.value = userToUpdate
                 } else {
-                    _errorMessages.value = "Failed to update user data."
+                    _errorMessages.value = "Falha ao atualizar dados do utilizador."
                 }
             } else {
-                _errorMessages.value = "No user data available to update."
+                _errorMessages.value = "Nenhuns dados de utilizador disponíveis para atualizar."
             }
         }
     }
@@ -70,15 +70,15 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
                     val updatedUser = user.copy(pass = hashedNewPassword)
                     val result = userRepository.updateUtilizador(updatedUser)
                     if (result > 0) {
-                        _passwordUpdateResult.postValue("Password updated successfully")
+                        _passwordUpdateResult.postValue("Password atualizada com sucesso.")
                     } else {
-                        _passwordUpdateResult.postValue("Failed to update password")
+                        _passwordUpdateResult.postValue("Falha ao atualizar a password")
                     }
                 } else {
-                    _passwordUpdateResult.postValue("New password cannot be empty")
+                    _passwordUpdateResult.postValue("Nova password não pode estar vazia")
                 }
             } else {
-                _passwordUpdateResult.postValue("Current password is incorrect")
+                _passwordUpdateResult.postValue("Password atual incorreta")
             }
         }
     }

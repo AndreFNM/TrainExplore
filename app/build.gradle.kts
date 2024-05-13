@@ -120,4 +120,15 @@ dependencies {
    implementation("com.google.gms:google-services:4.4.1")
 
     implementation ("com.sothree.slidinguppanel:library:3.4.0")
+
+    // Dependencias para testes unitarios
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.mockito:mockito-core:4.5.1") // Mockito for unit tests
+    testImplementation ("org.mockito:mockito-inline:4.5.1") // For final classes
+
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.mockito:mockito-core:4.5.1")
+    testImplementation ("org.mockito:mockito-inline:4.5.1")
+
 }

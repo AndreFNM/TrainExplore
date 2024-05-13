@@ -11,8 +11,7 @@ import com.example.trainexplore.R
 import com.example.trainexplore.database.AppDatabase
 import kotlinx.coroutines.launch
 
-
-class RegistarActivity: AppCompatActivity() {
+class RegistarActivity : AppCompatActivity() {
 
     private lateinit var repository : UtilizadorRepository
 
@@ -33,25 +32,32 @@ class RegistarActivity: AppCompatActivity() {
             val email = emailInput.text.toString().trim()
             val pass = passInput.text.toString().trim()
 
-            if (nome.isNotEmpty() && email.isNotEmpty() && pass.isNotEmpty()){
+            if (nome.isNotEmpty() && isValidEmail(email) && isValidPassword(pass)) {
                 lifecycleScope.launch {
                     val result = repository.registoUtilizador(nome, email, pass)
-                    if (result>0) {
-                        //em case de sucesso manda para ecra de login)
+                    if (result > 0) {
                         val intent = Intent(this@RegistarActivity, LoginActivity::class.java)
                         startActivity(intent)
                         finish()
                     } else {
-                        //em caso de erro
                         runOnUiThread {
-                            Toast.makeText(this@RegistarActivity, "Aconteceu um erro ao efetuar o registo. Por favor tente outra vez", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@RegistarActivity, "Ocorreu um erro no registo. Por favor tente outra vez.", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
             } else {
-                //dizer a utilizador para preencher os campos em falta
-                Toast.makeText(this@RegistarActivity, "Por favor preencha os campos em falta", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@RegistarActivity, "Por favor insira um email válido.", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun isValidPassword(password: String): Boolean {
+        val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!.,])(?=\\S+$).{5,}$"
+        return password.matches(passwordPattern.toRegex())
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"
+        return email.matches(emailPattern.toRegex())
     }
 }

@@ -3,10 +3,7 @@ package com.example.trainexplore
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.example.trainexplore.databinding.ActivityMainBinding
 import com.example.trainexplore.loginSystem.LoginActivity
 import com.example.trainexplore.loginSystem.SessionManager
@@ -20,24 +17,20 @@ class MainActivity : AppCompatActivity() {
         checkLoginStatus()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize with the Comboios fragment
         replaceFragment(Comboios())
+        binding.bottomNavigationView.selectedItemId = R.id.comboios  // Ensure correct item is highlighted
 
         binding.bottomNavigationView.setOnItemSelectedListener {
-
             when(it.itemId){
-
                 R.id.comboios -> replaceFragment(Comboios())
                 R.id.favoritos -> replaceFragment(Favoritos())
                 R.id.noticias -> replaceFragment(Noticias())
                 R.id.perfil -> replaceFragment(Perfil())
-
-                else ->{
-
-                }
             }
-            true
+            true  // Returning true here marks the selection
         }
-
     }
 
     private fun checkLoginStatus() {
@@ -47,14 +40,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-    private fun replaceFragment(fragment : Fragment)
-    {
+    private fun replaceFragment(fragment: Fragment) {
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.frame_layout,fragment)
+        fragmentTransaction.replace(R.id.frame_layout, fragment)
         fragmentTransaction.commit()
     }
 }

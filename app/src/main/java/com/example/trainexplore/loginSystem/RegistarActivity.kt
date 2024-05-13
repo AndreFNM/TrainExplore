@@ -52,7 +52,7 @@ class RegistarActivity : AppCompatActivity() {
     }
 
     private fun isValidPassword(password: String): Boolean {
-        val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[!.,])(?=\\S+$).{5,}$"
+        val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])(?=\\S+$).{5,}$"
         return password.matches(passwordPattern.toRegex())
     }
 

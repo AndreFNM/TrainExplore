@@ -221,14 +221,14 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     }
 
     override fun onMapClick(point: LatLng) {
-        Toast.makeText(this, "Map clicked at: $point", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Mapa clicado em: $point", Toast.LENGTH_SHORT).show()
     }
 
 
 
 
     private fun displayRouteOnMap(route: List<LatLng>) {
-        clearExistingPolyline()  // Ensure any previous route is removed
+        clearExistingPolyline()  // Assegurar que a rota anterior é removida
         routePolyline = map?.addPolyline(PolylineOptions().addAll(route).color(android.graphics.Color.RED).width(8f))
     }
 
@@ -248,7 +248,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         val originParam = "origin=${origin.latitude},${origin.longitude}"
         val destinationParam = "destination=${destination.latitude},${destination.longitude}"
         val modeParam = "mode=$selectedTravelMode"
-        val languageParam = "language=pt-PT"  // Set language to Portuguese from Portugal
+        val languageParam = "language=pt-PT"
         val apiKeyParam = "key=${getApiKey()}"
         return "https://maps.googleapis.com/maps/api/directions/json?$originParam&$destinationParam&$modeParam&$languageParam&$apiKeyParam"
     }
@@ -364,7 +364,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     private fun calcularRota(origem: LatLng, destino: LatLng) {
         fetchRoute(origem, destino)
         map?.let { safeMap ->
-            safeMap.addMarker(MarkerOptions().position(destino).title("Destination"))
+            safeMap.addMarker(MarkerOptions().position(destino).title("Destino"))
             safeMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destino, 15f))
         }
     }

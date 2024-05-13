@@ -25,7 +25,7 @@ class UtilizadorRepositoryTest {
     fun `register user returns correct id`() = runBlocking {
         val nome = "Test User"
         val email = "test@example.com"
-        val pass = "password123"
+        val pass = "Password123."
         whenever(database.utilizadorDao().registerUser(any())).thenReturn(1L)
 
         val result = repository.registoUtilizador(nome, email, pass)

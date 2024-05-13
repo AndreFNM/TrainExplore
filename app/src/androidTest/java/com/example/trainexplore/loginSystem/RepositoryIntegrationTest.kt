@@ -31,7 +31,7 @@ class RepositoryIntegrationTest {
     fun insertUserAndReadTest() = runBlocking {
         val nome = "Test User"
         val email = "test@example.com"
-        val pass = "password123"
+        val pass = "Password123."
         repository.registoUtilizador(nome, email, pass)
         val user = database.utilizadorDao().getUserByEmail(email)
         assertNotNull(user)

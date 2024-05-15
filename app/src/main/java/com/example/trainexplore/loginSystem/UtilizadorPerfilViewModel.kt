@@ -11,8 +11,8 @@ import com.example.trainexplore.loginSystem.UtilizadorRepository
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
 
-class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(application) {
-    private val userRepository = UtilizadorRepository(AppDatabase.getDatabase(application))
+class UtilizadorPerfilViewModel(application: Application, private val db: AppDatabase) : AndroidViewModel(application) {
+    private val userRepository = UtilizadorRepository(db)
 
     private val _currentUser = MutableLiveData<Utilizador?>()
     val currentUser: LiveData<Utilizador?> = _currentUser
@@ -22,6 +22,8 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
 
     private val _passwordUpdateResult = MutableLiveData<String>()
     val passwordUpdateResult: LiveData<String> = _passwordUpdateResult
+
+
 
     fun loadUserData(userId: Int) {
         viewModelScope.launch {
@@ -39,25 +41,31 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
 
     fun updateUserData(userId: Int, name: String, password: String?) {
         viewModelScope.launch {
-            val user = _currentUser.value
-            if (user != null) {
+            val currentUser = userRepository.getUtilizadorById(userId)
+            if (currentUser != null) {
+                if (userRepository.nomeExists(name) && name != currentUser.nome) {
+                    _errorMessages.postValue("Nome já utilizado. Por favor escolha outro.")
+                    return@launch
+                }
+
                 val userToUpdate = if (password.isNullOrEmpty()) {
-                    user.copy(nome = name)
+                    currentUser.copy(nome = name)
                 } else {
                     val hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt())
-                    user.copy(nome = name, pass = hashedPassword)
+                    currentUser.copy(nome = name, pass = hashedPassword)
                 }
                 val result = userRepository.updateUtilizador(userToUpdate)
                 if (result > 0) {
-                    _currentUser.value = userToUpdate
+                    _currentUser.postValue(userToUpdate)
                 } else {
-                    _errorMessages.value = "Falha ao atualizar dados do utilizador."
+                    _errorMessages.postValue("Falha ao atualizar dados do utilizador.")
                 }
             } else {
-                _errorMessages.value = "Nenhuns dados de utilizador disponíveis para atualizar."
+                _errorMessages.postValue("Nenhum dado de utilizador disponível para atualizar.")
             }
         }
     }
+
 
 
 
@@ -82,6 +90,11 @@ class UtilizadorPerfilViewModel(application: Application) : AndroidViewModel(app
             }
         }
     }
+
+    suspend fun nomeExists(nome: String): Boolean {
+        return db.utilizadorDao().getUserByNome(nome) != null
+    }
+
 
 
 }

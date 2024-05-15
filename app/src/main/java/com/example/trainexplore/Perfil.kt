@@ -16,6 +16,7 @@ import com.example.trainexplore.R
 import com.example.trainexplore.loginSystem.LoginActivity
 import com.example.trainexplore.loginSystem.SessionManager
 import com.example.trainexplore.loginSystem.UtilizadorPerfilViewModel
+import com.example.trainexplore.loginSystem.UtilizadorPerfilViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 
 class Perfil : Fragment() {
@@ -33,7 +34,9 @@ class Perfil : Fragment() {
     @SuppressLint("CutPasteId")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(UtilizadorPerfilViewModel::class.java)
+
+        val factory = UtilizadorPerfilViewModelFactory(requireActivity().application)
+        viewModel = ViewModelProvider(this, factory).get(UtilizadorPerfilViewModel::class.java)
 
         // Botões
         logoutButton = view.findViewById(R.id.logoutButton)
@@ -94,6 +97,13 @@ class Perfil : Fragment() {
         viewModel.passwordUpdateResult.observe(viewLifecycleOwner) { result ->
             Snackbar.make(view, result, Snackbar.LENGTH_LONG).show()
         }
+
+        viewModel.errorMessages.observe(viewLifecycleOwner) { errorMessage ->
+            if (errorMessage.isNotEmpty()) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
         logoutButton.setOnClickListener {
             SessionManager.clearSession(requireContext())

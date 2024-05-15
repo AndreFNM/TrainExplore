@@ -8,5 +8,4 @@ data class Utilizador(
     val nome: String,
     val email: String,
     val pass: String,
-    val imageUrl: String?, //Url para a imagem na cloud
 )

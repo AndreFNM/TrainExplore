@@ -45,11 +45,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:hint="@string/email"
+                android:inputType="textEmailAddress"
                 android:background="@drawable/rounded_corner"
                 android:padding="18dp"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@id/pass_login"
                 app:layout_constraintTop_toBottomOf="@id/loginLabel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
+
 
             <EditText
                 android:id="@+id/pass_login"

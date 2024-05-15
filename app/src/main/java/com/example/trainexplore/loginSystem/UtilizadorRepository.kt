@@ -9,9 +9,9 @@ import org.mindrot.jbcrypt.BCrypt
  class UtilizadorRepository(private val db: AppDatabase) {
         suspend fun registoUtilizador(nome: String, email: String, pass: String): Long {
             val hashedPass = BCrypt.hashpw(pass, BCrypt.gensalt())
-            val novoUtilizador = Utilizador(id = 0, nome = nome, email = email, pass = hashedPass, imageUrl = null)
+            val novoUtilizador = Utilizador(id = 0, nome = nome, email = email, pass = hashedPass)
             if (nomeExists(nome) || emailExists(email)) {
-                return -1 // Indicate failure due to existing username or email
+                return -1 // Indica falha devido à já existência de um nome de utilizador ou email
             }
             return withContext(Dispatchers.IO) {
                 db.utilizadorDao().registerUser(novoUtilizador)

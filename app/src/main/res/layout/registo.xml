@@ -20,7 +20,7 @@
             android:id="@+id/imagem_registo"
             android:layout_width="160dp"
             android:layout_height="160dp"
-            android:contentDescription="Imagem Registo"
+            android:contentDescription="@string/imagem_registo"
             app:srcCompat="@drawable/dall_e_2024_01_06_20_16_01___create_a_simple_icon_of_a_person_for_a_registration_screen__in_a_flat_light_blue_color__in_png_format_removebg_preview" />
 
         <TextView

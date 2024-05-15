@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "79f4f44462f8357b22105f1dab889de4",
+    "identityHash": "15da97a855cd0420652c8da961aba7c0",
     "entities": [
       {
         "tableName": "Estacao",
@@ -313,7 +313,7 @@
       },
       {
         "tableName": "Utilizador",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `email` TEXT NOT NULL, `pass` TEXT NOT NULL, `imageUrl` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nome` TEXT NOT NULL, `email` TEXT NOT NULL, `pass` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -338,12 +338,6 @@
             "columnName": "pass",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "imageUrl",
-            "columnName": "imageUrl",
-            "affinity": "TEXT",
-            "notNull": false
           }
         ],
         "primaryKey": {
@@ -409,7 +403,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '79f4f44462f8357b22105f1dab889de4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '15da97a855cd0420652c8da961aba7c0')"
     ]
   }
 }

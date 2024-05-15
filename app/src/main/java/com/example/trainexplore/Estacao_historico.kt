@@ -18,7 +18,6 @@ class Estacao_historico : AppCompatActivity() {
         if(estacaoId != -1) {
             val estacaoDao = AppDatabase.getDatabase(this).estacaoDao()
             estacaoDao.getEstacaoById(estacaoId).observe(this, Observer { estacao ->
-                findViewById<TextView>(R.id.nomeViewEstacao).text = estacao.nome
                 findViewById<TextView>(R.id.dataViewEstacao).text = estacao.ano_construcao
                 findViewById<TextView>(R.id.descricaoViewEstacao).text = estacao.descricao
                 findViewById<TextView>(R.id.estadoViewEstacao).text = estacao.estado_atual

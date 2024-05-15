@@ -42,6 +42,11 @@
     <string name="guardar_ateracoes">Guardar Alterações</string>
     <string name="pass_parametros">Password tem de conter pelo menos uma letra minúscula, uma maiúscula, um caractere especial, e tem de ter pelo menos 5 caracteres.</string>
     <string name="imagem_registo">Imagem Registo</string>
+    <string name="tempo_estimado">Tempo Estimado</string>
+    <string name="instruçoes_nav">Instruções de navegação</string>
+    <string name="carro">Carro</string>
+    <string name="a_pe">A Pé</string>
+    <string name="transportes_publicos">Transportes Públicos</string>
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>

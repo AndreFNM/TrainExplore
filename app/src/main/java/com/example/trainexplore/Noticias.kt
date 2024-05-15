@@ -1,5 +1,7 @@
 package com.example.trainexplore
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,11 +17,15 @@ import com.example.trainexplore.noticias.NewsAdapter
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import okhttp3.Interceptor
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 
 interface NoticiasServico {
     @GET("v2/everything")
@@ -53,53 +59,110 @@ class Noticias : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView(view)
+        setupSwipeRefreshLayout(view)
+        fetchNews()
+    }
+
+    private fun setupRecyclerView(view: View) {
         recyclerView = view.findViewById(R.id.newsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = NewsAdapter(emptyList())
         recyclerView.adapter = adapter
-
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
-        swipeRefreshLayout.setOnRefreshListener {
-            fetchNews()
-        }
-
-        fetchNews()
     }
 
-    private fun fetchNews() {
-        val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
-            Log.e("NewsAPI", "Erro a encontrar notícias", exception)
-            swipeRefreshLayout.isRefreshing = false
-            Toast.makeText(context, "Falha ao encontrar notícias. Por favor, tente mais tarde.", Toast.LENGTH_LONG).show()
+    private fun setupSwipeRefreshLayout(view: View) {
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener {
+            if (isNetworkAvailable()) {
+                fetchNews()
+            } else {
+                swipeRefreshLayout.isRefreshing = false
+                Toast.makeText(context, "Verifique sua conexão com a internet", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://newsapi.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        return connectivityManager?.activeNetworkInfo?.isConnected == true
+    }
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e("Noticias", "Error in coroutine", throwable)
+        lifecycleScope.launch(Dispatchers.Main) {
+            updateUI(emptyList(), "Erro ao processar a requisição.")
+        }
+    }
+    private fun fetchNews() {
+        val retrofit = setupRetrofit()
         val newsService = retrofit.create(NoticiasServico::class.java)
 
         lifecycleScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
             try {
-                val response = newsService.getNews(query = "Comboios de Portugal OR CP", apiKey = "9442fe2ecbeb48f48fc7c7d196937dec")
-                if (response.status == "ok" && response.articles.isNotEmpty()) {
-                    Log.d("NewsAPI", "Fetched articles: ${response.articles}")
+                val response = newsService.getNews(
+                    query = "\"Comboios Portugal\" OR \"CP\"",
+                    qInTitle = null,
+                    sources = null,
+                    domains = null,
+                    language = "pt",
+                    apiKey = "9442fe2ecbeb48f48fc7c7d196937dec"
+                )
+
+                if (response.status == "ok") {
                     val validArticles = response.articles.filter {
                         it.title != "[Removed]" && it.description != "[Removed]"
                     }
-                    launch(Dispatchers.Main) {
-                        adapter.updateData(validArticles)
-                        swipeRefreshLayout.isRefreshing = false
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        updateUI(validArticles, null)
                     }
                 } else {
-                    Log.e("NewsAPI", "Failed to fetch articles: Status: ${response.status}")
-                    swipeRefreshLayout.isRefreshing = false
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        updateUI(emptyList(), "No new articles found.")
+                    }
                 }
             } catch (e: HttpException) {
-                Log.e("NewsAPI", "HTTP resposta do erro: ${e.response()?.errorBody()?.string()}")
-                swipeRefreshLayout.isRefreshing = false
-                Toast.makeText(context, "Erro a conectar ao serviço.", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch(Dispatchers.Main) {
+                    updateUI(emptyList(), "Erro a conectar ao serviço.")
+                }
+            } catch (e: Exception) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    updateUI(emptyList(), "Erro ao processar a requisição.")
+                }
             }
         }
     }
+
+
+    private fun setupRetrofit(): Retrofit {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            .addNetworkInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header("Cache-Control", "no-cache")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+
+
+        return Retrofit.Builder()
+            .baseUrl("https://newsapi.org/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    private fun updateUI(articles: List<NewsArticle>, message: String?) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            adapter.updateData(articles)
+            swipeRefreshLayout.isRefreshing = false
+            message?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+        }
+    }
 }
+

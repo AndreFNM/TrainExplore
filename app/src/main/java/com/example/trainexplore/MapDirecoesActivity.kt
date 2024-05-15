@@ -32,6 +32,8 @@ import android.text.Html
 data class NavigationStep(
     val instruction: String,
     val distance: String,
+    val duration: String,
+    val durationInSecs: Int,
     val polyline: List<LatLng>,
     val travelMode: String? = null,
     val transitDetails: TransitDetails? = null
@@ -45,7 +47,6 @@ data class TransitDetails(
     val headsign: String,
     val numStops: Int
 )
-
 
 class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
     private var map: GoogleMap? = null
@@ -99,7 +100,6 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                 location?.let {
                     val userLatLng = LatLng(it.latitude, it.longitude)
                     val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
-                    // Clear the existing route before fetching a new one
                     clearExistingPolyline()
                     fetchRoute(userLatLng, destinationLatLng)
                 } ?: Toast.makeText(this, "Localização atual não disponível.", Toast.LENGTH_SHORT).show()
@@ -114,7 +114,6 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         routePolyline = null
     }
 
-
     private fun createLocationRequest() {
         locationRequest = LocationRequest.create().apply {
             interval = 10000
@@ -123,29 +122,39 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-    //verificar constantemente se o utilizador está a mudar de direção (startLocationUpdates e createLocationCallback)
     private fun startLocationUpdates() {
-        try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
-            } else {
-                Toast.makeText(this, "Permissões de localização não garantidas", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: SecurityException) {
-            Toast.makeText(this, "Falha ao pedir atualizações da localização: ${e.message}", Toast.LENGTH_LONG).show()
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        } else {
+            Toast.makeText(this, "Permissões de localização não garantidas", Toast.LENGTH_SHORT).show()
         }
     }
-
 
     private fun createLocationCallback() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    updateRoute(location) // Assegurar que a rota é atualizada após a atualização da localização do utilizador
+                locationResult.locations.lastOrNull()?.let { location ->
+                    updateRoute(location)
+                    animateCameraToLocation(location)
                 }
             }
         }
     }
+
+    private fun animateCameraToLocation(location: Location) {
+        val userLatLng = LatLng(location.latitude, location.longitude)
+        if (location.hasBearing()) {
+            val cameraPosition = CameraPosition.builder()
+                .target(userLatLng)
+                .zoom(15f)
+                .bearing(location.bearing)
+                .build()
+            map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        } else {
+            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 15f))
+        }
+    }
+
 
     private fun updateRoute(location: Location) {
         val userLocation = LatLng(location.latitude, location.longitude)
@@ -153,21 +162,17 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     }
 
     private fun requestLocationUpdate() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
-            return
-        }
-        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            location?.let {
-                updateRoute(it)
-            } ?: Toast.makeText(this, "Ultima localizão não disponível", Toast.LENGTH_SHORT).show()
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let { updateRoute(it) }
+                    ?: Toast.makeText(this, "Ultima localizão não disponível", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun checkRouteDeviation(userLocation: LatLng) {
-        routePolyline?.let {
-            // Verificar se a localição está no caminho atual
-            if (!PolyUtil.isLocationOnPath(userLocation, it.points, true, 100.0)) {
+        routePolyline?.let { polyline ->
+            if (!PolyUtil.isLocationOnPath(userLocation, polyline.points, true, 100.0)) {
                 val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
                 fetchRoute(userLocation, destinationLatLng)
                 Toast.makeText(this, "A Recalcular a rota...", Toast.LENGTH_SHORT).show()
@@ -177,82 +182,61 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-
     @SuppressLint("PotentialBehaviorOverride")
     private fun setupMap() {
         map?.let { safeMap ->
             safeMap.setOnMarkerClickListener(this)
             safeMap.setOnMapClickListener(this)
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                safeMap.isMyLocationEnabled = true
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        val userLocation = LatLng(it.latitude, it.longitude)
+                        val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
+                        val markerOptions = MarkerOptions().position(destinationLatLng).draggable(true)
+                        safeMap.addMarker(markerOptions)
+                        calcularRota(userLocation, destinationLatLng)
+
+                        safeMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
+                            override fun onMarkerDragStart(marker: Marker) {}
+                            override fun onMarkerDrag(marker: Marker) {}
+                            override fun onMarkerDragEnd(marker: Marker) {
+                                calcularRota(userLocation, marker.position)
+                            }
+                        })
+                    } ?: Toast.makeText(this, "Localização atual não disponível.", Toast.LENGTH_LONG).show()
+                }
+            } else {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
-                return
-            }
-            safeMap.isMyLocationEnabled = true
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    val userLocation = LatLng(it.latitude, it.longitude)
-                    val destinationLatLng = LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0))
-                    val markerOptions = MarkerOptions().position(destinationLatLng).draggable(true)
-                    safeMap.addMarker(markerOptions)
-
-                    calcularRota(userLocation, destinationLatLng)
-
-                    safeMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
-                        override fun onMarkerDragStart(marker: Marker) {}
-                        override fun onMarkerDrag(marker: Marker) {}
-                        override fun onMarkerDragEnd(marker: Marker) {
-                            calcularRota(userLocation, marker.position)
-                        }
-                    })
-                } ?: Toast.makeText(this, "Localização atual não disponível.", Toast.LENGTH_LONG).show()
             }
         }
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         setupMap()
     }
 
-    override fun onMarkerClick(marker: Marker): Boolean {
-        return false
-    }
+    override fun onMarkerClick(marker: Marker): Boolean = false
 
     override fun onMapClick(point: LatLng) {
         Toast.makeText(this, "Mapa clicado em: $point", Toast.LENGTH_SHORT).show()
     }
 
-
-
-
     private fun displayRouteOnMap(route: List<LatLng>) {
-        clearExistingPolyline()  // Assegurar que a rota anterior é removida
+        clearExistingPolyline()
         routePolyline = map?.addPolyline(PolylineOptions().addAll(route).color(android.graphics.Color.RED).width(8f))
     }
 
-
     private fun shouldRecalculateRoute(currentLocation: Location): Boolean {
         val currentLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-        val polyline = currentPolyline?.toList()
-
-        return if (polyline != null) {
-            !PolyUtil.isLocationOnPath(currentLatLng, polyline, true, 100.0)
-        } else {
-            true
-        }
+        return currentPolyline?.let { !PolyUtil.isLocationOnPath(currentLatLng, it.toList(), true, 100.0) } ?: true
     }
 
     private fun buildDirectionsUrl(origin: LatLng, destination: LatLng): String {
-        val originParam = "origin=${origin.latitude},${origin.longitude}"
-        val destinationParam = "destination=${destination.latitude},${destination.longitude}"
-        val modeParam = "mode=$selectedTravelMode"
-        val languageParam = "language=pt-PT"
-        val apiKeyParam = "key=${getApiKey()}"
-        return "https://maps.googleapis.com/maps/api/directions/json?$originParam&$destinationParam&$modeParam&$languageParam&$apiKeyParam"
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=$selectedTravelMode&language=pt-PT&key=${getApiKey()}"
     }
-
 
     private fun fetchRoute(origin: LatLng, destination: LatLng) {
         val url = buildDirectionsUrl(origin, destination)
@@ -266,8 +250,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 response.use { resp ->
                     if (resp.isSuccessful) {
-                        val jsonData = resp.body?.string()
-                        jsonData?.let { parseDirections(it) }
+                        resp.body?.string()?.let { parseDirections(it) }
                     } else {
                         runOnUiThread { Toast.makeText(this@MapDirecoesActivity, "Falha ao obter a rota", Toast.LENGTH_LONG).show() }
                     }
@@ -279,20 +262,17 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     private fun showNextStep() {
         if (currentStepIndex < steps.size) {
             val currentStep = steps[currentStepIndex]
-            val transitInfo = currentStep.transitDetails
-            if (transitInfo != null) {
-                findViewById<TextView>(R.id.navigationInstructions).text = buildString {
-                    append("${currentStep.instruction} - Apanhe o ${transitInfo.lineName} em direção a ${transitInfo.headsign}.")
-                    append("\nDe ${transitInfo.departureStop} para ${transitInfo.arrivalStop}, ${transitInfo.numStops} Paragens.")
-                }
-            } else {
-                findViewById<TextView>(R.id.navigationInstructions).text = "${currentStep.instruction} in ${currentStep.distance}"
-            }
+            findViewById<TextView>(R.id.navigationInstructions).text = formatInstruction(currentStep)
             currentStepIndex++
         }
     }
 
-
+    private fun formatInstruction(step: NavigationStep): String {
+        step.transitDetails?.let {
+            return "${step.instruction} - Apanhe o ${it.lineName} em direção a ${it.headsign}.\nDe ${it.departureStop} para ${it.arrivalStop}, ${it.numStops} Paragens."
+        }
+        return "${step.instruction} in ${step.distance}"
+    }
 
     private fun parseDirections(jsonData: String) {
         val jsonObject = JSONObject(jsonData)
@@ -301,15 +281,20 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
             val route = routes.getJSONObject(0)
             val legs = route.getJSONArray("legs")
             steps.clear()
+            var totalDuration = 0L
             val path = ArrayList<LatLng>()
 
             for (i in 0 until legs.length()) {
                 val leg = legs.getJSONObject(i)
+                totalDuration += leg.getJSONObject("duration").getLong("value")
                 val legSteps = leg.getJSONArray("steps")
+
                 for (j in 0 until legSteps.length()) {
                     val step = legSteps.getJSONObject(j)
                     val instruction = Html.fromHtml(step.getString("html_instructions")).toString()
                     val distance = step.getJSONObject("distance").getString("text")
+                    val duration = step.getJSONObject("duration").getString("text")
+                    val durationSecs = step.getJSONObject("duration").getInt("value")
                     val polyline = step.getJSONObject("polyline").getString("points")
                     val decodedPath = PolyUtil.decode(polyline)
                     val travelMode = step.getString("travel_mode")
@@ -327,12 +312,13 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                         )
                     }
 
-                    steps.add(NavigationStep(instruction, distance, decodedPath, travelMode, transitDetails))
+                    steps.add(NavigationStep(instruction, distance, duration, durationSecs, decodedPath, travelMode, transitDetails))
                     path.addAll(decodedPath)
                 }
             }
             runOnUiThread {
                 displayRouteOnMap(path)
+                findViewById<TextView>(R.id.estimatedTime).text = "Tempo Estimado: ${formatDuration(totalDuration)}"
                 if (steps.isNotEmpty()) {
                     showNextStep()
                 }
@@ -340,15 +326,17 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-
-
+    private fun formatDuration(seconds: Long): String {
+        val hours = seconds / 3600
+        val minutes = (seconds % 3600) / 60
+        return String.format("%dh %02dm", hours, minutes)
+    }
 
     private fun checkForNextStep(userLocation: LatLng) {
         if (currentStepIndex < steps.size && nearNextStep(userLocation, steps[currentStepIndex])) {
             showNextStep()
         }
     }
-
 
     private fun nearNextStep(userLocation: LatLng, step: NavigationStep): Boolean {
         val nextStepLocation = step.polyline.last()
@@ -399,10 +387,9 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
-                // Permissões não garatidas mas mostrar-se a resolução ao utilizador com um dialog
+                // Permissões não garantidas mas mostrar-se a resolução ao utilizador com um dialog
                 try {
-                    exception.startResolutionForResult(this@MapDirecoesActivity,
-                        REQUEST_CHECK_SETTINGS)
+                    exception.startResolutionForResult(this@MapDirecoesActivity, REQUEST_CHECK_SETTINGS)
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignorar este erro
                 }
@@ -417,12 +404,11 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                 if (resultCode == RESULT_OK) {
                     startLocationUpdates()
                 } else {
-                    Toast.makeText(this, "Localização não está ativada, o Utilizador cancelou.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Localização não está ativada, o utilizador cancelou.", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -440,31 +426,27 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-
     private fun updatePolyline(userLocation: LatLng) {
         routePolyline?.let { polyline ->
             val points = polyline.points
             val closestIndex = getClosestIndex(points, userLocation)
-            if (closestIndex > 0) {
+            if (closestIndex > currentStepIndex) {
+                // Calcular o tempo que falta pela quantidade de passos
+                val remainingTime = steps.subList(closestIndex, steps.size).sumOf { step ->
+                    step.durationInSecs.toLong()
+                }
+                findViewById<TextView>(R.id.estimatedTime).text = "Remaining time: ${formatDuration(remainingTime)}"
                 val updatedPoints = points.subList(closestIndex, points.size)
                 polyline.points = updatedPoints
+                currentStepIndex = closestIndex
             }
         }
     }
 
     private fun getClosestIndex(points: List<LatLng>, userLocation: LatLng): Int {
-        var closestDistance = Double.MAX_VALUE
-        var closestIndex = 0
-
-        for (index in points.indices) {
-            val point = points[index]
-            val distance = SphericalUtil.computeDistanceBetween(point, userLocation)
-            if (distance < closestDistance) {
-                closestDistance = distance
-                closestIndex = index
-            }
-        }
-        return closestIndex
+        return points.indices.minByOrNull { index ->
+            SphericalUtil.computeDistanceBetween(points[index], userLocation)
+        } ?: 0
     }
 
     private fun checkIfArrived(destination: LatLng, currentLocation: LatLng) {
@@ -475,8 +457,14 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     }
 
     private fun notifyUserArrived() {
-        Toast.makeText(this, "Chegou ao Destino!", Toast.LENGTH_LONG).show()
-        stopLocationUpdates()
+        AlertDialog.Builder(this)
+            .setTitle("Notificação de chegada")
+            .setMessage("Chegou ao Destino!")
+            .setPositiveButton("OK") { dialog, which ->
+                stopLocationUpdates()
+            }
+            .setIcon(android.R.drawable.ic_dialog_info)
+            .show()
     }
 
     private fun saveTravelMode(mode: String) {
@@ -485,6 +473,4 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         editor.putString("TravelMode", mode)
         editor.apply()
     }
-
-
 }

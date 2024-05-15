@@ -25,8 +25,8 @@ class NewsAdapter(private var articles: List<NewsArticle>) : RecyclerView.Adapte
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val article = articles[position]
-        holder.title.text = article.title ?: "No title available"
-        holder.description.text = article.description ?: "No description available"
+        holder.title.text = article.title ?: "Nenhum Título disponível"
+        holder.description.text = article.description ?: "Descrição não disponível"
         Glide.with(holder.imageView.context).load(article.urlToImage ?: R.drawable.ic_launcher_background).into(holder.imageView)
     }
 
@@ -34,6 +34,11 @@ class NewsAdapter(private var articles: List<NewsArticle>) : RecyclerView.Adapte
 
     fun updateData(newArticles: List<NewsArticle>) {
         articles = newArticles
+        notifyDataSetChanged()
+    }
+
+    fun setData(newData: List<NewsArticle>) {
+        articles = newData
         notifyDataSetChanged()
     }
 }

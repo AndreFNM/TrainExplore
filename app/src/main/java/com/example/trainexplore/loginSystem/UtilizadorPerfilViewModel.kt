@@ -73,7 +73,7 @@ class UtilizadorPerfilViewModel(application: Application, private val db: AppDat
         viewModelScope.launch {
             val user = userRepository.getUtilizadorById(userId)
             if (user != null && BCrypt.checkpw(currentPassword, user.pass)) {
-                if (newPassword.isNotEmpty()) {
+                if (newPassword.isNotEmpty() && ValidationUtil.isValidPassword(newPassword)) {
                     val hashedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt())
                     val updatedUser = user.copy(pass = hashedNewPassword)
                     val result = userRepository.updateUtilizador(updatedUser)
@@ -83,7 +83,10 @@ class UtilizadorPerfilViewModel(application: Application, private val db: AppDat
                         _passwordUpdateResult.postValue("Falha ao atualizar a password")
                     }
                 } else {
-                    _passwordUpdateResult.postValue("Nova password não pode estar vazia")
+                    if (newPassword.isEmpty())
+                        _passwordUpdateResult.postValue("Nova password não pode estar vazia")
+                    else
+                        _passwordUpdateResult.postValue("A nova password não cumpre os requisitos mínimos.")
                 }
             } else {
                 _passwordUpdateResult.postValue("Password atual incorreta")
@@ -91,10 +94,17 @@ class UtilizadorPerfilViewModel(application: Application, private val db: AppDat
         }
     }
 
+
     suspend fun nomeExists(nome: String): Boolean {
         return db.utilizadorDao().getUserByNome(nome) != null
     }
 
+    object ValidationUtil {
+        fun isValidPassword(password: String): Boolean {
+            val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])(?=\\S+$).{5,}$"
+            return password.matches(passwordPattern.toRegex())
+        }
+    }
 
 
 }

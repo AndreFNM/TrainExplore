@@ -49,19 +49,21 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-    private fun loginUtilizador(email: String, pass: String) {
+    private fun loginUtilizador(loginField: String, pass: String) {
         lifecycleScope.launch {
-            val IdUtilizador = repository.validarUtilizador(email, pass)
+            val IdUtilizador = repository.validarUtilizador(loginField, pass)
             if (IdUtilizador != null) {
                 SessionManager.saveSessionData(IdUtilizador.toString(), applicationContext)
 
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
             } else {
-                Toast.makeText(this@LoginActivity, "Email ou Password inválidos", Toast.LENGTH_LONG).show()
+                runOnUiThread {
+                    Toast.makeText(this@LoginActivity, "Credenciais de Login inválidas", Toast.LENGTH_LONG).show()
+                }
             }
         }
-
     }
+
 
 }

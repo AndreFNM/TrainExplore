@@ -40,6 +40,7 @@
     <string name="mostrar_estrada">Mostrar vista da estrada</string>
     <string name="clima_atual">Clima Atual</string>
     <string name="guardar_ateracoes">Guardar Alterações</string>
+    <string name="pass_parametros">Password tem de conter pelo menos uma letra minúscula, uma maiúscula, um caractere especial, e tem de ter pelo menos 5 caracteres.</string>
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>

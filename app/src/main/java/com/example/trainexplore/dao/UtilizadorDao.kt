@@ -19,6 +19,9 @@ interface UtilizadorDao{
     @Query("SELECT * FROM Utilizador WHERE id = :id LIMIT 1")
     fun getUserById(id: Int): Utilizador?
 
+    @Query("SELECT * FROM Utilizador WHERE nome = :nome LIMIT 1")
+    fun getUserByNome(nome: String): Utilizador?
+
     @Update
     fun updateUser(utilizador: Utilizador): Int
 }

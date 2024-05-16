@@ -39,7 +39,7 @@
                 android:visibility="gone"
                 android:drawablePadding="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:drawableStartCompat="@drawable/ic_launcher_background" />
+                app:drawableStartCompat="@drawable/acessibilidade" />
 
             <TextView
                 android:id="@+id/acessibilidadeInfo3"
@@ -49,7 +49,7 @@
                 android:visibility="gone"
                 android:drawablePadding="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:drawableStartCompat="@drawable/ic_launcher_background" />
+                app:drawableStartCompat="@drawable/acessibilidade" />
 
             <TextView
                 android:id="@+id/acessibilidadeInfo4"
@@ -59,7 +59,7 @@
                 android:visibility="gone"
                 android:drawablePadding="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:drawableStartCompat="@drawable/ic_launcher_background" />
+                app:drawableStartCompat="@drawable/acessibilidade" />
 
             <TextView
                 android:id="@+id/errorMessageTextView"

@@ -3,6 +3,7 @@ package com.example.trainexplore
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -92,7 +93,25 @@ class ClimaActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateUI(weather: WeatherResponse) {
-        findViewById<TextView>(R.id.textViewWeatherDescription).text =
-            "O clima em ${weather.name}: ${weather.weather[0].description} \n Temperatura: ${weather.main.temp}°C"
+        val weatherDescription = findViewById<TextView>(R.id.textViewWeatherDescription)
+        val temperature = findViewById<TextView>(R.id.textViewTemperature)
+        val weatherIcon = findViewById<ImageView>(R.id.imageViewWeatherIcon)
+
+        weatherDescription.text = "O clima em ${weather.name}: ${weather.weather[0].description}"
+        temperature.text = "Temperatura: ${weather.main.temp}°C"
+
+        // ícon do clima dependendo do tempo
+        val weatherCondition = weather.weather[0].main
+        val weatherIconResId = when (weatherCondition.toLowerCase()) {
+            "clear" -> R.drawable.ceu_limp
+            "clouds" -> R.drawable.algumas_nuvens
+            "rain" -> R.drawable.chuva
+            "drizzle" -> R.drawable.muita_chuva
+            "thunderstorm" -> R.drawable.trovoada
+            "snow" -> R.drawable.neve
+            "mist", "smoke", "haze", "dust", "fog", "sand", "ash", "squall", "tornado" -> R.drawable.mist
+            else -> R.drawable.ceu_limp
+        }
+        weatherIcon.setImageResource(weatherIconResId)
     }
 }

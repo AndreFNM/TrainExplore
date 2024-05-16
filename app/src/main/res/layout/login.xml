@@ -44,7 +44,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:hint="@string/email"
+                android:hint="@string/email_nome"
                 android:inputType="textEmailAddress"
                 android:background="@drawable/rounded_corner"
                 android:padding="18dp"

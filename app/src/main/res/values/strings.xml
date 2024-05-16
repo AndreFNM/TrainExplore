@@ -47,6 +47,7 @@
     <string name="carro">Carro</string>
     <string name="a_pe">A Pé</string>
     <string name="transportes_publicos">Transportes Públicos</string>
+    <string name="email_nome">Email ou Nome</string>
 
     <string-array name="filtro_favoritos">
         <item>Todos</item>

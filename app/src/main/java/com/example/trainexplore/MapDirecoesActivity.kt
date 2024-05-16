@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import android.view.WindowManager
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -27,7 +28,6 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.tasks.Task
 import com.google.maps.android.SphericalUtil
 import android.text.Html
-
 
 data class NavigationStep(
     val instruction: String,
@@ -155,10 +155,11 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-
     private fun updateRoute(location: Location) {
         val userLocation = LatLng(location.latitude, location.longitude)
         checkForNextStep(userLocation)
+        updatePolyline(userLocation)
+        checkIfArrived(LatLng(intent.getDoubleExtra("latitude", 0.0), intent.getDoubleExtra("longitude", 0.0)), userLocation)
     }
 
     private fun requestLocationUpdate() {
@@ -227,6 +228,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     private fun displayRouteOnMap(route: List<LatLng>) {
         clearExistingPolyline()
         routePolyline = map?.addPolyline(PolylineOptions().addAll(route).color(android.graphics.Color.RED).width(8f))
+        currentPolyline = route
     }
 
     private fun shouldRecalculateRoute(currentLocation: Location): Boolean {
@@ -275,54 +277,58 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     }
 
     private fun parseDirections(jsonData: String) {
-        val jsonObject = JSONObject(jsonData)
-        val routes = jsonObject.getJSONArray("routes")
-        if (routes.length() > 0) {
-            val route = routes.getJSONObject(0)
-            val legs = route.getJSONArray("legs")
-            steps.clear()
-            var totalDuration = 0L
-            val path = ArrayList<LatLng>()
+        try {
+            val jsonObject = JSONObject(jsonData)
+            val routes = jsonObject.getJSONArray("routes")
+            if (routes.length() > 0) {
+                val route = routes.getJSONObject(0)
+                val legs = route.getJSONArray("legs")
+                steps.clear()
+                var totalDuration = 0L
+                val path = ArrayList<LatLng>()
 
-            for (i in 0 until legs.length()) {
-                val leg = legs.getJSONObject(i)
-                totalDuration += leg.getJSONObject("duration").getLong("value")
-                val legSteps = leg.getJSONArray("steps")
+                for (i in 0 until legs.length()) {
+                    val leg = legs.getJSONObject(i)
+                    totalDuration += leg.getJSONObject("duration").getLong("value")
+                    val legSteps = leg.getJSONArray("steps")
 
-                for (j in 0 until legSteps.length()) {
-                    val step = legSteps.getJSONObject(j)
-                    val instruction = Html.fromHtml(step.getString("html_instructions")).toString()
-                    val distance = step.getJSONObject("distance").getString("text")
-                    val duration = step.getJSONObject("duration").getString("text")
-                    val durationSecs = step.getJSONObject("duration").getInt("value")
-                    val polyline = step.getJSONObject("polyline").getString("points")
-                    val decodedPath = PolyUtil.decode(polyline)
-                    val travelMode = step.getString("travel_mode")
+                    for (j in 0 until legSteps.length()) {
+                        val step = legSteps.getJSONObject(j)
+                        val instruction = Html.fromHtml(step.getString("html_instructions")).toString()
+                        val distance = step.getJSONObject("distance").getString("text")
+                        val duration = step.getJSONObject("duration").getString("text")
+                        val durationSecs = step.getJSONObject("duration").getInt("value")
+                        val polyline = step.getJSONObject("polyline").getString("points")
+                        val decodedPath = PolyUtil.decode(polyline)
+                        val travelMode = step.getString("travel_mode")
 
-                    var transitDetails: TransitDetails? = null
-                    if (travelMode == "TRANSIT") {
-                        val transitInfo = step.getJSONObject("transit_details")
-                        transitDetails = TransitDetails(
-                            departureStop = transitInfo.getJSONObject("departure_stop").getString("name"),
-                            arrivalStop = transitInfo.getJSONObject("arrival_stop").getString("name"),
-                            vehicleType = transitInfo.getJSONObject("line").getJSONObject("vehicle").getString("type"),
-                            lineName = transitInfo.getJSONObject("line").getString("short_name"),
-                            headsign = transitInfo.getString("headsign"),
-                            numStops = transitInfo.getInt("num_stops")
-                        )
+                        var transitDetails: TransitDetails? = null
+                        if (travelMode == "TRANSIT") {
+                            val transitInfo = step.getJSONObject("transit_details")
+                            transitDetails = TransitDetails(
+                                departureStop = transitInfo.getJSONObject("departure_stop").getString("name"),
+                                arrivalStop = transitInfo.getJSONObject("arrival_stop").getString("name"),
+                                vehicleType = transitInfo.getJSONObject("line").getJSONObject("vehicle").getString("type"),
+                                lineName = transitInfo.getJSONObject("line").getString("short_name"),
+                                headsign = transitInfo.getString("headsign"),
+                                numStops = transitInfo.getInt("num_stops")
+                            )
+                        }
+
+                        steps.add(NavigationStep(instruction, distance, duration, durationSecs, decodedPath, travelMode, transitDetails))
+                        path.addAll(decodedPath)
                     }
-
-                    steps.add(NavigationStep(instruction, distance, duration, durationSecs, decodedPath, travelMode, transitDetails))
-                    path.addAll(decodedPath)
+                }
+                runOnUiThread {
+                    displayRouteOnMap(path)
+                    findViewById<TextView>(R.id.estimatedTime).text = "Tempo Estimado: ${formatDuration(totalDuration)}"
+                    if (steps.isNotEmpty()) {
+                        showNextStep()
+                    }
                 }
             }
-            runOnUiThread {
-                displayRouteOnMap(path)
-                findViewById<TextView>(R.id.estimatedTime).text = "Tempo Estimado: ${formatDuration(totalDuration)}"
-                if (steps.isNotEmpty()) {
-                    showNextStep()
-                }
-            }
+        } catch (e: Exception) {
+            Log.e("MapDirecoesActivity", "Failed to parse directions: ${e.message}")
         }
     }
 
@@ -427,19 +433,23 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     }
 
     private fun updatePolyline(userLocation: LatLng) {
-        routePolyline?.let { polyline ->
-            val points = polyline.points
-            val closestIndex = getClosestIndex(points, userLocation)
-            if (closestIndex > currentStepIndex) {
-                // Calcular o tempo que falta pela quantidade de passos
-                val remainingTime = steps.subList(closestIndex, steps.size).sumOf { step ->
-                    step.durationInSecs.toLong()
+        try {
+            routePolyline?.let { polyline ->
+                val points = polyline.points
+                val closestIndex = getClosestIndex(points, userLocation)
+                if (closestIndex > 0) {
+                    val updatedPoints = points.subList(closestIndex, points.size)
+                    polyline.points = updatedPoints
+
+                    val remainingTime = steps.subList(currentStepIndex, steps.size).sumOf { step ->
+                        step.durationInSecs.toLong()
+                    }
+                    findViewById<TextView>(R.id.estimatedTime).text = "Tempo restante: ${formatDuration(remainingTime)}"
+                    currentStepIndex = closestIndex
                 }
-                findViewById<TextView>(R.id.estimatedTime).text = "Remaining time: ${formatDuration(remainingTime)}"
-                val updatedPoints = points.subList(closestIndex, points.size)
-                polyline.points = updatedPoints
-                currentStepIndex = closestIndex
             }
+        } catch (e: Exception) {
+            Log.e("MapDirecoesActivity", "Failed to update polyline: ${e.message}")
         }
     }
 

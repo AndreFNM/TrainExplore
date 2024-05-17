@@ -30,9 +30,19 @@ class LoginActivity : AppCompatActivity() {
         repository = UtilizadorRepository(db)
 
         SessionManager.loadSession(this)
-        if (SessionManager.userId != null) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+
+        // Verifica se o id da sessão do utilizador existe na base de dados
+        lifecycleScope.launch {
+            val sessionUserId = SessionManager.userId
+            if (sessionUserId != null) {
+                val userExists = repository.checkUserExists(sessionUserId.toInt())
+                if (userExists) {
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    finish()
+                } else {
+                    SessionManager.clearSession(this@LoginActivity)
+                }
+            }
         }
 
         loginButton.setOnClickListener {

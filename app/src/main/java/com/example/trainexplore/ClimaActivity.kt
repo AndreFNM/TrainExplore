@@ -3,6 +3,7 @@ package com.example.trainexplore
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -15,6 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import kotlin.math.round
 
 data class WeatherResponse(
     val main: Main,
@@ -45,22 +47,30 @@ interface WeatherService {
 
 class ClimaActivity : AppCompatActivity() {
 
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_clima)
 
-        val latitude = intent.getDoubleExtra("latitude", 0.0)
-        val longitude = intent.getDoubleExtra("longitude", 0.0)
+        latitude = intent.getDoubleExtra("latitude", 0.0)
+        longitude = intent.getDoubleExtra("longitude", 0.0)
 
         if (latitude != 0.0 && longitude != 0.0) {
             getWeather(latitude, longitude)
         } else {
             Toast.makeText(this, "Coordenadas inválidas.", Toast.LENGTH_LONG).show()
         }
+
+        val refreshButton = findViewById<Button>(R.id.buttonRefreshWeather)
+        refreshButton.setOnClickListener {
+            getWeather(latitude, longitude)
+        }
     }
 
     private fun getWeather(latitude: Double, longitude: Double) {
-        val apiKey= getApiKey()
+        val apiKey = getApiKey()
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.openweathermap.org/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -98,7 +108,8 @@ class ClimaActivity : AppCompatActivity() {
         val weatherIcon = findViewById<ImageView>(R.id.imageViewWeatherIcon)
 
         weatherDescription.text = "O clima em ${weather.name}: ${weather.weather[0].description}"
-        temperature.text = "Temperatura: ${weather.main.temp}°C"
+        val roundedTemp = round(weather.main.temp).toInt()
+        temperature.text = "Temperatura: ${roundedTemp}°C"
 
         // ícon do clima dependendo do tempo
         val weatherCondition = weather.weather[0].main

@@ -24,4 +24,10 @@ interface UtilizadorDao{
 
     @Update
     fun updateUser(utilizador: Utilizador): Int
+
+    @Query("SELECT id FROM utilizador WHERE email = :email AND pass = :password")
+    suspend fun validarUtilizador(email: String, password: String): Int?
+
+    @Query("SELECT id FROM utilizador WHERE id = :userId")
+    suspend fun checkUserExists(userId: Int): Int?
 }

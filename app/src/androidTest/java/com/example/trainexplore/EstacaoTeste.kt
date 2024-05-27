@@ -28,30 +28,28 @@ class EstacaoTeste {
 
     @Test
     fun testEstacaoInfoIsDisplayed() {
-        // Check if the station information is displayed
+        // Ver se a informação sobre a estação é mostrada
         onView(withId(R.id.nomeViewEstacao)).check(matches(isDisplayed()))
         onView(withId(R.id.imagemViewEstacao)).check(matches(isDisplayed()))
     }
 
     @Test
     fun testMostrarHistoricoButton() {
-        // Perform a click on the "Mostrar Historico" button and check the intent
+        // verificar o intent quande se clica no botão mostrar buttonMostrarHistorico
         onView(withId(R.id.buttonMostrarHistorico)).perform(click())
         intended(hasComponent(Estacao_historico::class.java.name))
     }
 
     @Test
     fun testMostrarAcessibilidadeButton() {
-        // Perform a click on the "Mostrar Acessibilidade" button and check the intent
+        // realizar um click no botão buttonMostrarAcessibilidade e verificar o intent
         onView(withId(R.id.buttonMostrarAcessibilidade)).perform(click())
         intended(hasComponent(AcessibilidadeActivity::class.java.name))
     }
 
     @Test
     fun testAddEstacaoFavButton() {
-        // Perform a click on the "Add Estacao Favoritos" button and verify the toast message
+        // realizar um click no botão addEstacaoFavButton e verificar se apareceu um Toas
         onView(withId(R.id.addEstacaoFavButton)).perform(click())
-        // Check if the Toast message is displayed
-        // Assuming that the Toast message is displayed, you may need a custom matcher for Toast
     }
 }

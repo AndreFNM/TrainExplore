@@ -1,6 +1,7 @@
 package com.example.trainexplore
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
@@ -23,8 +24,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-import okhttp3.Interceptor
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 
 interface NoticiasServico {
@@ -94,6 +93,15 @@ class Noticias : Fragment() {
             updateUI(emptyList(), "Erro ao processar a requisição.")
         }
     }
+
+    private fun getApiKey(): String {
+        val context = requireContext()
+        val packageManager = context.packageManager
+        val packageName = context.packageName
+        return packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA).metaData.getString("noticias.API_KEY")
+            ?: throw IllegalStateException("API key não encontrada no manifest")
+    }
+
     private fun fetchNews() {
         val retrofit = setupRetrofit()
         val newsService = retrofit.create(NoticiasServico::class.java)
@@ -106,7 +114,7 @@ class Noticias : Fragment() {
                     sources = null,
                     domains = null,
                     language = "pt",
-                    apiKey = "9442fe2ecbeb48f48fc7c7d196937dec"
+                    apiKey = getApiKey()
                 )
 
                 if (response.status == "ok") {
@@ -133,14 +141,13 @@ class Noticias : Fragment() {
         }
     }
 
-
     private fun setupRetrofit(): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val client = OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            .addInterceptor(loggingInterceptor)
             .addNetworkInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .header("Cache-Control", "no-cache")
@@ -148,7 +155,6 @@ class Noticias : Fragment() {
                 chain.proceed(request)
             }
             .build()
-
 
         return Retrofit.Builder()
             .baseUrl("https://newsapi.org/")
@@ -165,4 +171,3 @@ class Noticias : Fragment() {
         }
     }
 }
-

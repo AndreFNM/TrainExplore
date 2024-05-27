@@ -225,7 +225,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         Toast.makeText(this, "Mapa clicado em: $point", Toast.LENGTH_SHORT).show()
     }
 
-    private fun displayRouteOnMap(route: List<LatLng>) {
+    fun displayRouteOnMap(route: List<LatLng>) {
         clearExistingPolyline()
         routePolyline = map?.addPolyline(PolylineOptions().addAll(route).color(android.graphics.Color.RED).width(8f))
         currentPolyline = route
@@ -276,7 +276,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         return "${step.instruction} in ${step.distance}"
     }
 
-    private fun parseDirections(jsonData: String) {
+    fun parseDirections(jsonData: String) {
         try {
             val jsonObject = JSONObject(jsonData)
             val routes = jsonObject.getJSONArray("routes")
@@ -332,7 +332,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         }
     }
 
-    private fun formatDuration(seconds: Long): String {
+    fun formatDuration(seconds: Long): String {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
         return String.format("%dh %02dm", hours, minutes)

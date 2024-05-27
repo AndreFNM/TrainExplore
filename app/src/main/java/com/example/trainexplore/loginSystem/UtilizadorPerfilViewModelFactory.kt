@@ -11,6 +11,6 @@ class UtilizadorPerfilViewModelFactory(private val application: Application) : V
             @Suppress("UNCHECKED_CAST")
             return UtilizadorPerfilViewModel(application, AppDatabase.getDatabase(application)) as T
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
+        throw IllegalArgumentException("ViewModel class não conhecida")
     }
 }

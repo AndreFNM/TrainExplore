@@ -13,19 +13,20 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="Tests in 'com.example.trainexplore.loginSystem'">
+      <SelectionState runConfigName="MapDirecoesActivityTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="All Tests">
+      <SelectionState runConfigName="Tests in 'com.example.trainexplore.testutils'">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-05-13T09:52:54.888576Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/andremagalhaes/.android/avd/Pixel_8_Pro_API_34.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="RepositoryIntegrationTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="LoginActivityTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="RegisterActivityTest">
+        <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
   </component>

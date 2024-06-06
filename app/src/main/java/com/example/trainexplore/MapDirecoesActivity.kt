@@ -116,8 +116,8 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
     private fun createLocationRequest() {
         locationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
+            interval = 3000  // Intervalo de verificação reduzido para 3 segundos
+            fastestInterval = 1000  // Intervalo mais rápido reduzido para 1 segundo
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
     }
@@ -136,6 +136,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
                 locationResult.locations.lastOrNull()?.let { location ->
                     updateRoute(location)
                     animateCameraToLocation(location)
+                    checkRouteDeviation(LatLng(location.latitude, location.longitude)) // Verificar desvio imediatamente
                 }
             }
         }
@@ -146,12 +147,12 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         if (location.hasBearing()) {
             val cameraPosition = CameraPosition.builder()
                 .target(userLatLng)
-                .zoom(15f)
+                .zoom(18f)  // Aumentar o zoom para 18
                 .bearing(location.bearing)
                 .build()
-            map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, null) // Animação suave de 1 segundo
         } else {
-            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 15f))
+            map?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 18f), 1000, null) // Animação suave de 1 segundo
         }
     }
 
@@ -359,7 +360,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
         fetchRoute(origem, destino)
         map?.let { safeMap ->
             safeMap.addMarker(MarkerOptions().position(destino).title("Destino"))
-            safeMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destino, 15f))
+            safeMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destino, 18f)) // Ajuste do zoom para 18
         }
     }
 
@@ -377,8 +378,8 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
     private fun checkLocationSettings() {
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 10000
-            fastestInterval = 5000
+            interval = 3000  // Intervalo de verificação reduzido para 3 segundos
+            fastestInterval = 1000  // Intervalo mais rápido reduzido para 1 segundo
         }
 
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
@@ -461,7 +462,7 @@ class MapDirecoesActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.O
 
     private fun checkIfArrived(destination: LatLng, currentLocation: LatLng) {
         val distance = SphericalUtil.computeDistanceBetween(currentLocation, destination)
-        if (distance < 50) { // aos 50 metros de proximidade considera que o utilizador chegou ao local.
+        if (distance < 30) { // aos 30 metros de proximidade considera que o utilizador chegou ao local.
             notifyUserArrived()
         }
     }

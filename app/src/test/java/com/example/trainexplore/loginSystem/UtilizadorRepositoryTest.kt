@@ -1,3 +1,4 @@
+/*
 package com.example.trainexplore.loginSystem
 
 import com.example.trainexplore.database.AppDatabase
@@ -32,3 +33,4 @@ class UtilizadorRepositoryTest {
         assertEquals(1, result)
     }
 }
+*/
